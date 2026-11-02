@@ -1,0 +1,759 @@
+<title>Guía de armado Kernel Panic</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Silkscreen:wght@400;700&display=swap">
+<style>
+/* Layout: una sola columna de pasos sobre "placa" oscura; cada paso = diagrama + conexiones + prueba. Tema oscuro único, igual que el juego. */
+:root{
+  --board:#0a171b; --panel:#0f2227; --panel-2:#132a30; --line:#22434c; --line-2:#3a6470;
+  --ink:#dde7e4; --muted:#8aa6a8; --copper:#cf8545;
+  --v33:#ff5d6c; --v5:#ff9b3d; --gnd:#6b9cff; --sig:#f2d24b; --dat:#62e3f2; --an:#c58bff; --ledw:#5bd98f; --neu:#9fb4b6;
+  --res:#d9c39a; --res-ink:#2a1d0c; --ok:#5bd98f; --warn:#ff9b3d;
+  --fd:"Silkscreen","Courier New",monospace;
+  --fb:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --fm:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+html,body{background:var(--board);color:var(--ink)}
+body{font-family:var(--fb);font-size:15px;line-height:1.55}
+.wrap{max-width:980px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 56px}
+header{border-bottom:2px solid var(--copper);padding-bottom:14px;margin-bottom:20px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:10px 24px}
+h1{font-family:var(--fd);font-weight:700;font-size:clamp(26px,5vw,40px);line-height:1.05;margin:0;text-wrap:balance}
+h1 span{color:var(--v33)}
+.sub{color:var(--muted);font-size:13px;letter-spacing:.06em;text-transform:uppercase;margin-top:6px}
+.progress{font-family:var(--fm);font-size:13px;color:var(--muted);display:flex;align-items:center;gap:10px}
+.progress .bar{width:140px;height:8px;background:var(--panel-2);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.progress .bar i{display:block;height:100%;width:0;background:var(--ok);transition:width .25s}
+.lead{max-width:68ch;color:#c7d6d4;margin:0 0 18px}
+code,.pin{font-family:var(--fm);font-size:.88em;background:var(--panel-2);border:1px solid var(--line);border-radius:4px;padding:0 5px;white-space:nowrap}
+.top{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px;margin-bottom:22px}
+@media(max-width:760px){.top{grid-template-columns:minmax(0,1fr)}}
+.box{background:var(--panel);border:1px solid var(--line);padding:14px 16px;min-width:0}
+.box h2{font-family:var(--fd);font-weight:400;font-size:14px;color:var(--copper);margin:0 0 10px;letter-spacing:.03em}
+.rules{border-color:var(--warn)}
+.rules ol{margin:0;padding-left:20px;display:grid;gap:6px}
+.rules strong{color:var(--warn)}
+.mat{margin:0;padding:0;list-style:none;display:grid;gap:3px;font-size:14px}
+.mat li{display:flex;gap:10px}
+.mat b{font-family:var(--fm);font-weight:600;min-width:2.2em;text-align:right;color:var(--copper)}
+.mat .grp{color:var(--muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-top:6px}
+.note{font-size:13px;color:var(--muted);margin:10px 0 0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;margin:0 0 26px;padding:10px 14px;border:1px dashed var(--line)}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend i{width:22px;height:4px;border-radius:2px;display:inline-block}
+
+.step{border-top:1px solid var(--line);padding-top:22px;margin-top:26px}
+.step-h{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.num{font-family:var(--fd);font-size:28px;color:var(--copper);line-height:1}
+.step h3{font-family:var(--fd);font-weight:400;font-size:19px;margin:0;flex:1;min-width:200px;text-wrap:balance}
+.done{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);cursor:pointer;user-select:none}
+.done input{width:18px;height:18px;accent-color:var(--ok);cursor:pointer}
+.step.is-done .num{color:var(--ok)}
+.step.is-done h3{color:var(--ok)}
+.fig{margin:14px 0;background:#081316;border:1px solid var(--line);overflow-x:auto}
+.fig svg{display:block;width:100%;min-width:560px;height:auto}
+.board-fig svg{min-width:900px}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media(max-width:760px){.cols{grid-template-columns:minmax(0,1fr)}}
+.cols h4{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 6px;font-weight:600}
+.cols ul{margin:0;padding-left:18px;display:grid;gap:5px}
+.test{background:var(--panel);border-left:3px solid var(--ok);padding:10px 14px;margin-bottom:12px}
+.test p{margin:0}
+.fail{background:var(--panel);border-left:3px solid var(--v33);padding:10px 14px}
+.fail ul{font-size:14px}
+.tip{font-size:14px;color:#c7d6d4;margin:10px 0 0}
+.tip b{color:var(--sig);font-weight:600}
+
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+td:first-child{font-family:var(--fm);white-space:nowrap}
+.tbls{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px;margin-top:14px}
+@media(max-width:760px){.tbls{grid-template-columns:minmax(0,1fr)}}
+.tw{overflow-x:auto}
+
+/* SVG */
+svg text{font-family:var(--fm);font-size:12px;fill:var(--ink)}
+svg .m{fill:var(--muted);font-size:11px}
+svg .t{font-family:var(--fd);font-size:12px;fill:var(--copper)}
+svg .rt{fill:var(--res-ink);font-size:10.5px;font-weight:600}
+svg .blk{fill:var(--panel-2);stroke:var(--line-2);stroke-width:1.5}
+svg .zone5{fill:none;stroke:var(--v5);stroke-width:1.5;stroke-dasharray:6 5}
+svg .zone3{fill:none;stroke:var(--v33);stroke-width:1.5;stroke-dasharray:6 5}
+svg .res{fill:var(--res);stroke:#8a7650;stroke-width:1}
+svg .w{fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+svg .rail{stroke-width:8;stroke-linecap:round;opacity:.45}
+svg .v33{stroke:var(--v33)} svg .v5{stroke:var(--v5)} svg .gnd{stroke:var(--gnd)} svg .sig{stroke:var(--sig)}
+svg .dat{stroke:var(--dat)} svg .an{stroke:var(--an)} svg .ledw{stroke:var(--ledw)} svg .neu{stroke:var(--neu)}
+svg .nc{stroke:var(--line-2);stroke-dasharray:4 4}
+svg .dot{fill:var(--ink)}
+svg .leda{fill:#f4b740}
+svg .bg{fill:#081316}
+svg .meas{fill:var(--ok)}
+#pb text{font-family:var(--fb)}
+input:focus-visible{outline:2px solid var(--dat);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.progress .bar i{transition:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>GUÍA DE <span>ARMADO</span></h1>
+      <div class="sub">Kernel Panic · control con cable y consola en protoboard</div>
+    </div>
+    <div class="progress" aria-live="polite"><div class="bar"><i id="pbar"></i></div><span id="ptxt">0 de 7 pasos</span></div>
+  </header>
+
+  <p class="lead">El proyecto tiene dos partes. El <b>control</b> va en la mano: el joystick y el botón de ataque, unidos al Arduino UNO con un cable de 6 hilos. La <b>consola</b> queda sobre la mesa: el UNO, el NodeMCU, el protoboard con la barra de LEDs y el buzzer. Cada placa se alimenta con <b>su propio cable USB</b> (notebook, cargador de celular o power bank). Armá y probá una parte por vez: cada paso termina con una prueba.</p>
+
+  <div class="top">
+    <section class="box rules">
+      <h2>Reglas para no quemar nada</h2>
+      <ol>
+        <li><strong>Cableá con todo desconectado:</strong> sin ningún USB enchufado.</li>
+        <li><strong>El 5 V nunca entra al protoboard.</strong> Las filas de alimentación son solo de 3,3 V (del pin 3V3 del NodeMCU). El 5 V del UNO va únicamente al joystick, con un cable directo.</li>
+        <li><strong>A un pin de señal del ESP nunca le llegan 5 V.</strong> Lo único que viene del UNO a un pin de señal es el TX, y pasa por el divisor de tensión.</li>
+        <li><strong>GND común:</strong> el GND del UNO y el del ESP unidos.</li>
+        <li><strong>Cada placa con su USB.</strong> No unas el 5V del UNO con el VIN ni con el 3V3 del NodeMCU, y no uses la pila de 9V. Así nunca hay dos fuentes peleando.</li>
+      </ol>
+    </section>
+    <section class="box">
+      <h2>Lo que vas a usar</h2>
+      <ul class="mat">
+        <li class="grp">El control</li>
+        <li><b>1</b>Joystick KY-023</li>
+        <li><b>1</b>Pulsador de ataque (si podés, de 12 mm con capuchón o un botón de arcade)</li>
+        <li><b>6</b>Cables macho-hembra largos (30 a 50 cm)</li>
+        <li><b>1</b>Tablita, cartón duro o protoboard mini como base</li>
+        <li class="grp">La consola</li>
+        <li><b>1</b>Arduino UNO y NodeMCU ESP8266, con sus cables USB</li>
+        <li><b>1</b>Protoboard de 60 columnas</li>
+        <li><b>1</b>74HC595 y 8 LEDs (3 rojos, 5 amarillos)</li>
+        <li><b>8</b>Resistencias de 220 Ω (rojo, rojo, marrón)</li>
+        <li><b>3</b>Resistencias de 1 kΩ (marrón, negro, rojo)</li>
+        <li><b>1</b>Buzzer</li>
+        <li><b>2</b>Cables USB (uno por placa) y dónde enchufarlos: notebook, cargador doble o power bank de 2 salidas</li>
+        <li><b>~20</b>Cables macho-macho</li>
+      </ul>
+    </section>
+  </div>
+
+  <!-- ========== MAPA DE VOLTAJES ========== -->
+  <section class="box" style="margin-bottom:22px">
+    <h2>Mapa de voltajes: dos zonas que se tocan en solo dos puntos</h2>
+    <div class="fig" style="margin:6px 0 10px">
+      <svg viewBox="0 0 760 250" role="img" aria-label="Zona de 5 voltios con el UNO y el control; zona de 3,3 voltios con el NodeMCU, el 595, los LEDs y el buzzer; cada una con su USB; se unen solo por TX con divisor a D2 y GND común">
+        <rect class="zone5" x="12" y="14" width="300" height="222" rx="8"/>
+        <rect class="zone3" x="448" y="14" width="300" height="222" rx="8"/>
+        <text class="t" x="26" y="36" style="fill:var(--v5)">ZONA 5 V</text>
+        <text class="t" x="462" y="36" style="fill:var(--v33)">ZONA 3,3 V</text>
+        <text x="26" y="64">Su USB → Arduino UNO</text>
+        <text x="26" y="86">Control: joystick + botón</text>
+        <text class="m" x="26" y="108">(alimentado con el 5V del UNO)</text>
+        <text x="462" y="64">Su USB → NodeMCU ESP8266</text>
+        <text x="462" y="86">74HC595 + 8 LEDs, buzzer</text>
+        <text class="m" x="462" y="108">(todo con el pin 3V3 del NodeMCU)</text>
+                <path class="w v5" d="M312 178 H350"/>
+        <rect class="res" x="350" y="169" width="40" height="18" rx="3"/><text class="rt" x="370" y="182" text-anchor="middle">÷</text>
+        <path class="w sig" d="M390 178 H448"/><text x="380" y="162" text-anchor="middle" style="font-size:11px">① TX → divisor → D2</text>
+        <path class="w gnd" d="M312 214 H448"/><text x="380" y="206" text-anchor="middle" style="font-size:11px">② GND con GND</text>
+        <circle class="meas" cx="420" cy="178" r="6"/>
+                <text class="m" x="738" y="178" text-anchor="end" style="fill:var(--ok)">● medí ≈ 3,3 V (nunca más de 3,6 V)</text>
+      </svg>
+    </div>
+    <p class="note" style="margin-top:0">Ningún cable de alimentación cruza de una placa a la otra. El punto ① es seguro porque el divisor baja los pulsos de 5 V del UNO a 3,3 V. El punto ② (GND común) es obligatorio: sin él el ESP no entiende los datos. El ESP nunca le manda nada al UNO, así que no hay riesgo en el otro sentido.</p>
+  </section>
+
+  <div class="legend" aria-label="Colores de los cables en los diagramas">
+    <span><i style="background:var(--v33)"></i>3,3 V</span>
+    <span><i style="background:var(--v5)"></i>5 V (solo zona UNO)</span>
+    <span><i style="background:var(--gnd)"></i>GND</span>
+    <span><i style="background:var(--sig)"></i>Señal</span>
+    <span><i style="background:var(--dat)"></i>Control del 595</span>
+    <span><i style="background:var(--an)"></i>Analógica</span>
+    <span><i style="background:var(--ledw)"></i>A los LEDs</span>
+  </div>
+
+  <!-- ========== VISTA DEL PROTOBOARD ========== -->
+  <section class="step" id="vista">
+    <div class="step-h"><h3 style="color:var(--copper)">Vista del protoboard de la consola</h3></div>
+    <p class="tip" style="max-width:72ch">Así queda la consola armada, vista desde arriba. Las columnas van de 1 a 60 y las filas de la <b>a</b> a la <b>e</b> (arriba) y de la <b>f</b> a la <b>j</b> (abajo). El UNO y el control quedan afuera del protoboard; del UNO llegan solo dos cables: TX y GND. Los nombres de los pines del NodeMCU pueden variar entre clones: <b>confirmalos con lo impreso en tu placa</b>.</p>
+    <p class="note" style="max-width:72ch"><b>Ojo con tu protoboard:</b> del lado de los LEDs, la fila <b>+ (línea roja) es la de adentro</b> y la <b>− (línea azul) la de afuera</b>, como en el dibujo. Guiate siempre por el color de la línea, no por la posición. Si la línea roja y la azul están <b>cortadas a la mitad</b> del protoboard, las filas están partidas en dos: uní cada mitad con un cable corto (rojo con rojo y azul con azul), como los dos puentes de la columna 30. Si no estás seguro, ponelos igual: no molestan.</p>
+    <div class="fig board-fig"><svg id="pb" viewBox="0 -40 940 385" role="img" aria-label="Vista superior del protoboard: NodeMCU en las columnas 1 a 15, 74HC595 en 19 a 26, LEDs en las columnas impares de 29 a 43, buzzer en 46 a 49 y divisor de tensión en 52 a 49"></svg></div>
+    <div class="tbls" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
+      <div class="box tw">
+        <h2>Alimentación</h2>
+        <table><tbody>
+          <tr><td>a5 → fila + arriba</td><td>3V3 del NodeMCU</td></tr>
+          <tr><td>a6 → fila − arriba</td><td>GND del NodeMCU</td></tr>
+          <tr><td>j1 → fila + abajo</td><td>3V3 del NodeMCU</td></tr>
+          <tr><td>j2 → fila − abajo</td><td>GND del NodeMCU</td></tr>
+          <tr><td>USB del NodeMCU</td><td>Alimenta todo el protoboard</td></tr>
+        </tbody></table>
+      </div>
+      <div class="box tw">
+        <h2>74HC595 (muesca a la derecha)</h2>
+        <table><tbody>
+          <tr><td>a19 → fila − arriba</td><td>pata 8 · GND</td></tr>
+          <tr><td>j26 → fila + abajo (roja)</td><td>pata 16 · VCC</td></tr>
+          <tr><td>j20 → fila + abajo</td><td>pata 10 · MR</td></tr>
+          <tr><td>j23 → fila − abajo</td><td>pata 13 · OE</td></tr>
+          <tr><td>j6 → i24</td><td>D7 → pata 14 · DS</td></tr>
+          <tr><td>j5 → i21</td><td>D8 → pata 11 · SH_CP</td></tr>
+          <tr><td>j15 → h22</td><td>D0 → pata 12 · ST_CP</td></tr>
+        </tbody></table>
+      </div>
+      <div class="box tw">
+        <h2>LEDs (columnas 29, 31, 33… 43: una sí, una no)</h2>
+        <table><tbody>
+          <tr><td>g25 → c29</td><td>Q0 → LED 1 (rojo)</td></tr>
+          <tr><td>d26 → d31</td><td>Q1 → LED 2 (rojo)</td></tr>
+          <tr><td>c25 → c33</td><td>Q2 → LED 3 (rojo)</td></tr>
+          <tr><td>d24 → d35</td><td>Q3 → LED 4</td></tr>
+          <tr><td>c23 → c37</td><td>Q4 → LED 5</td></tr>
+          <tr><td>b22 → b39</td><td>Q5 → LED 6</td></tr>
+          <tr><td>d21 → d41</td><td>Q6 → LED 7</td></tr>
+          <tr><td>b20 → b43</td><td>Q7 → LED 8</td></tr>
+          <tr><td>e · f</td><td>LED cruzando el canal: pata larga en e, pata corta en f</td></tr>
+          <tr><td>j → fila − abajo (azul)</td><td>220 Ω de cada LED a GND</td></tr>
+        </tbody></table>
+      </div>
+      <div class="box tw">
+        <h2>Buzzer y divisor</h2>
+        <table><tbody>
+          <tr><td>h46 · h49</td><td>buzzer: + en 46, − en 49</td></tr>
+          <tr><td>j7 → j46</td><td>D6 → buzzer +</td></tr>
+          <tr><td>j49 → fila − abajo</td><td>buzzer −</td></tr>
+          <tr><td>j52 ← TX del UNO</td><td>cable desde el pin 1 del UNO</td></tr>
+          <tr><td>i52 → i54 · g54 → g56</td><td>1 kΩ cada una</td></tr>
+          <tr><td>j56 → fila − abajo</td><td>1 kΩ</td></tr>
+          <tr><td>h54 → j13</td><td>punto de unión → D2</td></tr>
+          <tr><td>fila − abajo, col. 59 ← GND del UNO</td><td>GND común</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PASO 1 ========== -->
+  <section class="step" data-step="1">
+    <div class="step-h"><span class="num">1</span><h3>Base: NodeMCU y filas de 3,3 V</h3>
+      <label class="done"><input type="checkbox" id="chk1"> Paso terminado</label></div>
+    <div class="fig">
+      <svg viewBox="0 0 560 200" role="img" aria-label="El pin 3V3 del NodeMCU va a la fila + y el pin GND a la fila − del protoboard">
+        <rect class="blk" x="30" y="40" width="150" height="120" rx="6"/>
+        <text class="t" x="105" y="66" text-anchor="middle">NodeMCU</text>
+        <text class="m" x="105" y="82" text-anchor="middle">ESP8266</text>
+        <text x="170" y="99" text-anchor="end">3V3</text>
+        <text x="170" y="134" text-anchor="end">GND</text>
+        <line class="rail v33" x1="260" y1="70" x2="530" y2="70"/>
+        <line class="rail gnd" x1="260" y1="150" x2="530" y2="150"/>
+        <path class="w v33" d="M180 95 H220 V70 H260"/>
+        <path class="w gnd" d="M180 130 H220 V150 H260"/>
+        <circle class="dot" cx="180" cy="95" r="3.5"/><circle class="dot" cx="180" cy="130" r="3.5"/>
+        <text x="395" y="56" text-anchor="middle">Fila + del protoboard: 3,3 V</text>
+        <text x="395" y="176" text-anchor="middle">Fila − del protoboard: GND</text>
+        <text class="m" x="395" y="114" text-anchor="middle">Todo el lado del ESP se alimenta de acá</text>
+      </svg>
+    </div>
+    <div class="cols">
+      <div>
+        <h4>Qué hacer</h4>
+        <ul>
+          <li>Pinchá el NodeMCU sobre el canal central, en las columnas 1 a 15, con el USB hacia afuera.</li>
+          <li>Si tu NodeMCU es de los anchos (por ejemplo, LoLin V3) y tapa todos los agujeros, usá dos protoboards juntos, uno debajo de cada fila de pines.</li>
+          <li>Uní <span class="pin">3V3</span> con la fila + y <span class="pin">GND</span> con la fila −, arriba y abajo.</li>
+        </ul>
+      </div>
+      <div>
+        <div class="test"><h4>Probalo</h4><p>Conectá el USB, elegí la placa <b>NodeMCU 1.0 (ESP-12E Module)</b> y cargá la <b>Prueba 1</b>. Si se carga sin error, la placa funciona.</p></div>
+        <div class="fail"><h4>Si falla</h4><ul>
+          <li>No aparece el puerto: instalá el driver CH340 o CP2102, según el chip que esté al lado del USB.</li>
+          <li>Probá con otro cable USB: algunos solo cargan y no transmiten datos.</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PASO 2 ========== -->
+  <section class="step" data-step="2">
+    <div class="step-h"><span class="num">2</span><h3>74HC595 y barra de 8 LEDs</h3>
+      <label class="done"><input type="checkbox" id="chk2"> Paso terminado</label></div>
+    <div class="fig">
+      <svg viewBox="0 0 620 310" role="img" aria-label="Conexiones de las 16 patas del 74HC595">
+        <text class="t" x="320" y="18" text-anchor="middle">74HC595 visto desde arriba</text>
+        <rect class="blk" x="230" y="40" width="180" height="250" rx="4"/>
+        <path d="M308 40 a12 12 0 0 0 24 0" class="bg" stroke="var(--line-2)" stroke-width="1.5"/>
+        <text class="m" x="352" y="34">muesca</text>
+        <g>
+          <path class="w ledw" d="M230 60 H150"/><text x="238" y="64">1 Q1</text><text x="142" y="64" text-anchor="end">LED 2 · rojo</text>
+          <path class="w ledw" d="M230 90 H150"/><text x="238" y="94">2 Q2</text><text x="142" y="94" text-anchor="end">LED 3 · rojo</text>
+          <path class="w ledw" d="M230 120 H150"/><text x="238" y="124">3 Q3</text><text x="142" y="124" text-anchor="end">LED 4 · amarillo</text>
+          <path class="w ledw" d="M230 150 H150"/><text x="238" y="154">4 Q4</text><text x="142" y="154" text-anchor="end">LED 5 · amarillo</text>
+          <path class="w ledw" d="M230 180 H150"/><text x="238" y="184">5 Q5</text><text x="142" y="184" text-anchor="end">LED 6 · amarillo</text>
+          <path class="w ledw" d="M230 210 H150"/><text x="238" y="214">6 Q6</text><text x="142" y="214" text-anchor="end">LED 7 · amarillo</text>
+          <path class="w ledw" d="M230 240 H150"/><text x="238" y="244">7 Q7</text><text x="142" y="244" text-anchor="end">LED 8 · amarillo</text>
+          <path class="w gnd" d="M230 270 H150"/><text x="238" y="274">8 GND</text><text x="142" y="274" text-anchor="end">GND</text>
+        </g>
+        <g>
+          <path class="w v33" d="M410 60 H490"/><text x="402" y="64" text-anchor="end">VCC 16</text><text x="498" y="64">3,3 V</text>
+          <path class="w ledw" d="M410 90 H490"/><text x="402" y="94" text-anchor="end">Q0 15</text><text x="498" y="94">LED 1 · rojo</text>
+          <path class="w dat" d="M410 120 H490"/><text x="402" y="124" text-anchor="end">DS 14</text><text x="498" y="124">D7 (datos)</text>
+          <path class="w gnd" d="M410 150 H490"/><text x="402" y="154" text-anchor="end">OE 13</text><text x="498" y="154">GND</text>
+          <path class="w dat" d="M410 180 H490"/><text x="402" y="184" text-anchor="end">ST_CP 12</text><text x="498" y="184">D0 (latch)</text>
+          <path class="w dat" d="M410 210 H490"/><text x="402" y="214" text-anchor="end">SH_CP 11</text><text x="498" y="214">D8 (reloj)</text>
+          <path class="w v33" d="M410 240 H490"/><text x="402" y="244" text-anchor="end">MR 10</text><text x="498" y="244">3,3 V</text>
+          <path class="w nc" d="M410 270 H490"/><text x="402" y="274" text-anchor="end">Q7' 9</text><text class="m" x="498" y="274">sin conectar</text>
+        </g>
+      </svg>
+    </div>
+    <div class="fig">
+      <svg viewBox="0 0 560 96" role="img" aria-label="Cada salida del 595 va a la pata larga del LED; la pata corta pasa por una resistencia de 220 ohm hasta GND">
+        <text class="t" x="20" y="22">Cada LED</text>
+        <text x="20" y="54">Salida Q del 595</text>
+        <path class="w ledw" d="M150 50 H200"/>
+        <path d="M200 34 L230 50 L200 66 Z" class="leda"/>
+        <path class="w neu" d="M230 34 V66"/>
+        <text class="m" x="195" y="28" text-anchor="middle">pata larga (+)</text>
+        <text class="m" x="240" y="86" text-anchor="middle">pata corta (−)</text>
+        <path class="w gnd" d="M230 50 H280"/>
+        <rect class="res" x="280" y="41" width="70" height="18" rx="3"/><text class="rt" x="315" y="54" text-anchor="middle">220 Ω</text>
+        <path class="w gnd" d="M350 50 H420"/>
+        <text x="430" y="54">GND</text>
+      </svg>
+    </div>
+    <div class="cols">
+      <div>
+        <h4>Qué hacer</h4>
+        <ul>
+          <li>Pinchá el 74HC595 cruzando el canal central, en las columnas 19 a 26, con la <b>muesca hacia la derecha</b>. Seguí las posiciones de la vista del protoboard.</li>
+          <li>Alimentación: patas <span class="pin">16</span> y <span class="pin">10</span> a 3,3 V. Patas <span class="pin">8</span> y <span class="pin">13</span> a GND.</li>
+          <li>Control: <span class="pin">14 → D7</span>, <span class="pin">11 → D8</span>, <span class="pin">12 → D0</span>.</li>
+          <li>LEDs en las columnas 29, 31, 33, 35, 37, 39, 41 y 43 (una sí, una no, porque los LEDs son más anchos que una columna): cada LED <b>cruza el canal</b>: pata larga en la fila <b>e</b>, pata corta en la <b>f</b>. Después, una resistencia de 220 Ω desde la fila <b>j</b> de esa columna hasta la fila <b>−</b> (azul) de abajo; sus patas largas pasan por encima de la fila +.</li>
+        </ul>
+      </div>
+      <div>
+        <div class="test"><h4>Probalo</h4><p>Cargá la <b>Prueba 1</b>. Los LEDs se encienden de a uno, de Q0 a Q7, vuelven, y después se prenden todos juntos.</p></div>
+        <div class="fail"><h4>Si falla</h4><ul>
+          <li>No enciende ninguno: revisá las patas 16 y 8, la 13 en GND y la 10 en 3,3 V.</li>
+          <li>No enciende uno solo: está al revés o le falta su resistencia.</li>
+          <li>Se encienden desordenados: D7, D8 y D0 están intercambiados.</li>
+          <li>El programa no se carga con todo conectado: desconectá D8, cargá y volvé a conectarlo.</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PASO 3 ========== -->
+  <section class="step" data-step="3">
+    <div class="step-h"><span class="num">3</span><h3>Buzzer</h3>
+      <label class="done"><input type="checkbox" id="chk3"> Paso terminado</label></div>
+    <div class="fig">
+      <svg viewBox="0 0 560 120" role="img" aria-label="D6 al positivo del buzzer, GND al negativo">
+        <rect class="blk" x="30" y="25" width="120" height="74" rx="6"/>
+        <text class="t" x="90" y="45" text-anchor="middle">NodeMCU</text>
+        <text x="140" y="66" text-anchor="end">D6</text>
+        <text x="140" y="90" text-anchor="end">GND</text>
+        <path class="w sig" d="M150 62 H290"/><path class="w gnd" d="M150 86 H290"/>
+        <circle class="dot" cx="150" cy="62" r="3.5"/><circle class="dot" cx="150" cy="86" r="3.5"/>
+        <rect class="blk" x="290" y="40" width="120" height="62" rx="31"/>
+        <text x="350" y="76" text-anchor="middle">Buzzer</text>
+        <text x="300" y="58">+</text><text x="300" y="98">−</text>
+        <text class="m" x="430" y="66">el + suele estar</text>
+        <text class="m" x="430" y="82">marcado en la tapa</text>
+      </svg>
+    </div>
+    <div class="cols">
+      <div>
+        <h4>Qué hacer</h4>
+        <ul>
+          <li>Buzzer en las columnas 46 a 49: pata <span class="pin">+</span> en la 46, conectada a <span class="pin">D6</span>.</li>
+          <li>Pata <span class="pin">−</span> en la 49, conectada a la fila de GND.</li>
+        </ul>
+      </div>
+      <div>
+        <div class="test"><h4>Probalo</h4><p>Cargá la <b>Prueba 2</b>: suena una escala y la melodía de "game over". Si suena siempre el mismo pitido, el buzzer es activo: sirve igual, pero sin melodías.</p></div>
+        <div class="fail"><h4>Si falla</h4><ul><li>Si no suena, dalo vuelta: en los buzzers activos importa la polaridad.</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PASO 4 ========== -->
+  <section class="step" data-step="4">
+    <div class="step-h"><span class="num">4</span><h3>El control: joystick, botón y cable al UNO</h3>
+      <label class="done"><input type="checkbox" id="chk4"> Paso terminado</label></div>
+    <div class="fig">
+      <svg viewBox="0 0 700 300" role="img" aria-label="El control con el joystick y el botón de ataque se une al UNO con 6 cables: GND, 5V, VRx a A0, VRy a A1, SW al pin 2 y el botón al pin 3">
+        <rect class="zone5" x="14" y="20" width="250" height="262" rx="18"/>
+        <text class="t" x="139" y="44" text-anchor="middle">EL CONTROL (en la mano)</text>
+        <circle class="blk" cx="80" cy="140" r="44"/>
+        <circle cx="80" cy="140" r="20" fill="#3d3d3d" stroke="#111"/>
+        <text class="m" x="80" y="204" text-anchor="middle">Joystick</text>
+        <circle class="blk" cx="205" cy="140" r="26"/>
+        <circle cx="205" cy="140" r="14" fill="#c0392b" stroke="#111"/>
+        <text class="m" x="205" y="186" text-anchor="middle">Ataque</text>
+
+        <rect class="blk" x="510" y="40" width="170" height="230" rx="6"/>
+        <text class="t" x="595" y="64" text-anchor="middle">Arduino UNO</text>
+        <text x="520" y="94">GND</text>
+        <text x="520" y="124">5V</text>
+        <text x="520" y="154">A0</text>
+        <text x="520" y="184">A1</text>
+        <text x="520" y="214">pin 2</text>
+        <text x="520" y="244">pin 3</text>
+
+        <path class="w gnd" d="M264 90 H510"/>
+        <path class="w v5" d="M264 120 H510"/>
+        <path class="w an" d="M264 150 H510"/>
+        <path class="w an" d="M264 180 H510"/>
+        <path class="w sig" d="M264 210 H510"/>
+        <path class="w sig" d="M264 240 H510" style="stroke:#ff8a8a"/>
+        <text class="m" x="390" y="84" text-anchor="middle">GND (joystick y botón)</text>
+        <text class="m" x="390" y="114" text-anchor="middle">+5V del joystick</text>
+        <text class="m" x="390" y="144" text-anchor="middle">VRx · eje X</text>
+        <text class="m" x="390" y="174" text-anchor="middle">VRy · eje Y</text>
+        <text class="m" x="390" y="204" text-anchor="middle">SW · pulsador</text>
+        <text class="m" x="390" y="234" text-anchor="middle">botón de ataque</text>
+        <text class="m" x="390" y="276" text-anchor="middle">cable de 6 hilos, 30 a 50 cm</text>
+      </svg>
+    </div>
+    <div class="cols">
+      <div>
+        <h4>Qué hacer</h4>
+        <ul>
+          <li>Montá el joystick a la izquierda y el botón a la derecha de una tablita, un cartón duro o un protoboard mini, como un gamepad. El KY-023 tiene 4 agujeros para atornillarlo o pegarlo.</li>
+          <li>Con cables macho-hembra largos: <span class="pin">GND → GND</span>, <span class="pin">+5V → 5V</span>, <span class="pin">VRx → A0</span>, <span class="pin">VRy → A1</span>, <span class="pin">SW → 2</span>.</li>
+          <li>Botón: una pata al <span class="pin">pin 3</span> del UNO y la otra al mismo GND del joystick (un puente corto en el control). Así el cable lleva 6 hilos.</li>
+          <li>Encintá los 6 cables juntos cada 10 cm para que queden como un solo cable.</li>
+          <li>Todavía no conectes nada entre el UNO y el ESP.</li>
+        </ul>
+        <p class="tip"><b>Pulsadores de 4 patas:</b> usá dos patas en diagonal. Así siempre funcionan como interruptor, sin importar cómo lo pongas.</p>
+      </div>
+      <div>
+        <div class="test"><h4>Probalo</h4><p>Cargá <b>JoystickUNO</b> en el UNO (placa: Arduino Uno) y abrí el Monitor Serie a 38400. Con todo quieto deberías ver algo como <code>519,507,1,1</code>. Cada eje llega a 0 y a 1023 en los extremos. Al hundir la palanca, el tercer número pasa a 0; al apretar el botón de ataque, el cuarto.</p></div>
+        <div class="fail"><h4>Si falla</h4><ul>
+          <li>Se ven símbolos raros: el Monitor Serie no está en 38400.</li>
+          <li>X e Y están cambiados: intercambiá los cables de A0 y A1.</li>
+          <li>Un eje va al revés: lo corregís en el paso 7 con <code>INVERTIR_X</code> o <code>INVERTIR_Y</code>.</li>
+          <li>El botón siempre da 1: usá patas en diagonal y revisá que la otra pata vaya a GND.</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PASO 5 ========== -->
+  <section class="step" data-step="5">
+    <div class="step-h"><span class="num">5</span><h3>Comunicación UNO → ESP: divisor de tensión y GND común</h3>
+      <label class="done"><input type="checkbox" id="chk5"> Paso terminado</label></div>
+    <div class="fig">
+      <svg viewBox="0 0 680 262" role="img" aria-label="TX del UNO pasa por una resistencia de 1 kilo ohm hasta un punto de unión; de ahí va a D2 del NodeMCU y, por dos resistencias de 1 kilo ohm en serie, a GND. GND del UNO unido a GND del NodeMCU">
+        <rect class="blk" x="30" y="40" width="150" height="170" rx="6"/>
+        <text class="t" x="105" y="64" text-anchor="middle">Arduino UNO</text>
+        <text x="170" y="84" text-anchor="end">TX (pin 1)</text>
+        <text x="170" y="184" text-anchor="end">GND</text>
+        <rect class="blk" x="500" y="40" width="150" height="170" rx="6"/>
+        <text class="t" x="575" y="64" text-anchor="middle">NodeMCU</text>
+        <text x="510" y="84">D2</text>
+        <text x="510" y="184">GND</text>
+        <path class="w v5" d="M180 80 H225"/>
+        <rect class="res" x="225" y="71" width="70" height="18" rx="3"/><text class="rt" x="260" y="84" text-anchor="middle">1 kΩ</text>
+        <path class="w sig" d="M295 80 H500"/>
+        <path class="w neu" d="M340 80 V100"/>
+        <rect class="res" x="331" y="100" width="18" height="40" rx="3"/>
+        <path class="w neu" d="M340 140 V150"/>
+        <rect class="res" x="331" y="150" width="18" height="40" rx="3"/>
+        <path class="w gnd" d="M340 190 V230"/>
+        <text class="m" x="360" y="124">1 kΩ</text>
+        <text class="m" x="360" y="174">1 kΩ</text>
+        <path class="w gnd" d="M180 180 H210 V230 H470 V180 H500"/>
+        <circle class="dot" cx="180" cy="80" r="3.5"/><circle class="dot" cx="180" cy="180" r="3.5"/>
+        <circle class="dot" cx="500" cy="80" r="3.5"/><circle class="dot" cx="500" cy="180" r="3.5"/>
+        <circle class="dot" cx="340" cy="80" r="4"/><circle class="dot" cx="340" cy="230" r="4"/>
+        <text class="m" x="202" y="70" text-anchor="middle">5 V</text>
+        <text class="m" x="420" y="70" text-anchor="middle">≈ 3,3 V</text>
+        <text class="m" x="340" y="252" text-anchor="middle">GND común</text>
+      </svg>
+    </div>
+    <div class="cols">
+      <div>
+        <h4>Qué hacer</h4>
+        <ul>
+          <li><span class="pin">TX</span> del UNO (es el pin 1, no el 0) → columna 52 del protoboard → 1 kΩ → punto de unión (columna 54).</li>
+          <li>Del punto de unión → <span class="pin">D2</span> del NodeMCU.</li>
+          <li>Del punto de unión → 1 kΩ → 1 kΩ → GND.</li>
+          <li><span class="pin">GND</span> del UNO → fila − del protoboard.</li>
+        </ul>
+        <p class="tip"><b>Por qué:</b> el UNO manda pulsos de 5 V y el ESP aguanta 3,3 V. Las tres resistencias reparten el voltaje: 5 V × 2 kΩ / 3 kΩ ≈ 3,3 V.</p>
+      </div>
+      <div>
+        <div class="test"><h4>Probalo</h4><p>Conectá los dos USB. Cargá la <b>Prueba 4</b> en el ESP y abrí su Monitor Serie a 115200. Deberías ver líneas como <code>X= 519  Y= 507  SW=1  BOTON=1 → CENTRO</code>, que cambian al mover la palanca y al apretar el botón.</p></div>
+        <div class="fail"><h4>Si falla</h4><ul>
+          <li>No llega nada: revisá el GND común y que el cable salga del pin 1 (TX).</li>
+          <li>Aparece "Línea con error" muy seguido: hay un cable flojo.</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PASO 6 ========== -->
+  <section class="step" data-step="6">
+    <div class="step-h"><span class="num">6</span><h3>Alimentación: un USB para cada placa</h3>
+      <label class="done"><input type="checkbox" id="chk6"> Paso terminado</label></div>
+    <div class="fig">
+      <svg viewBox="0 0 680 230" role="img" aria-label="Un USB alimenta al UNO y otro USB al NodeMCU; entre las placas solo van TX por el divisor y GND">
+        <rect class="blk" x="24" y="40" width="110" height="160" rx="8"/>
+        <text class="t" x="79" y="110" text-anchor="middle">Notebook</text>
+        <text class="m" x="79" y="130" text-anchor="middle">o power bank</text>
+        <text class="m" x="79" y="146" text-anchor="middle">de 2 salidas</text>
+        <rect class="blk" x="250" y="40" width="160" height="160" rx="6"/>
+        <text class="t" x="330" y="64" text-anchor="middle">Arduino UNO</text>
+        <text x="260" y="104">USB</text>
+        <text x="400" y="104" text-anchor="end">TX</text>
+        <text x="400" y="164" text-anchor="end">GND</text>
+        <rect class="blk" x="520" y="40" width="140" height="160" rx="6"/>
+        <text class="t" x="590" y="64" text-anchor="middle">NodeMCU</text>
+        <text x="530" y="104">D2</text>
+        <text x="530" y="164">GND</text>
+        <text x="590" y="214" text-anchor="middle">USB</text>
+        <path class="w" style="stroke:#8a96a0" d="M134 100 H250"/>
+        <text class="m" x="192" y="92" text-anchor="middle">cable USB del UNO</text>
+        <path class="w" style="stroke:#8a96a0" d="M134 180 H210 V222 H590 V200"/>
+        <text class="m" x="300" y="216" text-anchor="middle">cable USB del NodeMCU</text>
+        <path class="w sig" d="M410 100 H445"/>
+        <rect class="res" x="445" y="91" width="40" height="18" rx="3"/><text class="rt" x="465" y="104" text-anchor="middle">÷</text>
+        <path class="w sig" d="M485 100 H520"/>
+        <path class="w gnd" d="M410 160 H520"/>
+        <text class="m" x="465" y="82" text-anchor="middle">divisor (paso 5)</text>
+        <text class="m" x="465" y="152" text-anchor="middle">GND común</text>
+      </svg>
+    </div>
+    <div class="cols">
+      <div>
+        <h4>Qué hacer</h4>
+        <ul>
+          <li>El UNO va con su cable USB (el de impresora, tipo B) y el NodeMCU con el suyo (micro-USB).</li>
+          <li>Enchufá los dos a la misma notebook, a un cargador doble o a un power bank de 2 salidas.</li>
+          <li><b>No</b> hay cable de 5V a VIN ni pila de 9V. Entre las placas pasan solo los dos cables del paso 5: TX (por el divisor) y GND.</li>
+          <li>Pegá el UNO al lado del protoboard con cinta doble faz, para que los cables no tironeen.</li>
+        </ul>
+        <p class="tip"><b>Ventaja:</b> para cargar programas no hay que desconectar nada; cada placa ya está en su USB.</p>
+      </div>
+      <div>
+        <div class="test"><h4>Probalo con el tester</h4><p>Con los dos USB enchufados: entre la fila + del protoboard y la fila − tiene que dar <b>cerca de 3,3 V</b>. En el punto de unión del divisor (columna 54) y GND tiene que dar <b>entre 3 y 3,4 V</b> mientras el UNO transmite, nunca más de 3,6 V.</p></div>
+        <div class="fail"><h4>Si falla</h4><ul>
+          <li>El ESP se reinicia solo: probá otro cable micro-USB (algunos son finitos y pierden tensión) o otra salida del cargador.</li>
+          <li>El power bank se apaga solo: algunos se cortan con poco consumo. Usá la notebook o un cargador de pared.</li>
+          <li>La página dice "UNO sin señal": revisá el GND común y el divisor (paso 5).</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PASO 7 ========== -->
+  <section class="step" data-step="7">
+    <div class="step-h"><span class="num">7</span><h3>Todo junto: cargar el juego</h3>
+      <label class="done"><input type="checkbox" id="chk7"> Paso terminado</label></div>
+    <div class="cols" style="margin-top:14px">
+      <div>
+        <h4>Qué hacer</h4>
+        <ul>
+          <li>En <code>config.h</code>, poné el nombre y la clave de la red Wi-Fi.</li>
+          <li>Conectá el USB del NodeMCU a la compu y cargá el firmware del juego. El Monitor Serie (115200) muestra la dirección IP.</li>
+          <li>Para jugar podés dejar los dos USB en la notebook, o pasarlos a un cargador doble o power bank.</li>
+          <li>Abrí la IP en el celular o la PC, conectados a la misma red. Si el ESP no encuentra la red, crea la suya: <b>KernelPanic-ESP</b>, clave <code>kernelpanic</code>, en <code>http://192.168.4.1</code>.</li>
+          <li>Durante los primeros segundos dejá el joystick quieto: el ESP mide el centro.</li>
+        </ul>
+      </div>
+      <div>
+        <div class="test"><h4>Probalo</h4><p>En el panel "Hardware en vivo" de la página tiene que decir <b>UNO conectado</b>. El punto del joystick sigue a la palanca y la barra de LEDs de la página coincide con la real.</p></div>
+        <div class="fail"><h4>Si falla</h4><ul>
+          <li>Dice "UNO sin señal": volvé al paso 5.</li>
+          <li>El personaje va al revés: poné <code>INVERTIR_X</code> o <code>INVERTIR_Y</code> en 1 en <code>config.h</code>.</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== REFERENCIA ========== -->
+  <section class="step">
+    <div class="step-h"><h3 style="color:var(--copper)">Referencia rápida de pines</h3></div>
+    <div class="tbls">
+      <div class="box tw">
+        <h2>NodeMCU ESP8266 (consola)</h2>
+        <table>
+          <thead><tr><th>Pin</th><th>Va a</th></tr></thead>
+          <tbody>
+            <tr><td>USB</td><td>Alimentación (su propio cable)</td></tr>
+            <tr><td>3V3</td><td>Filas + del protoboard: 595 (16 y 10)</td></tr>
+            <tr><td>GND</td><td>Filas −: 595 (8 y 13), LEDs, buzzer, divisor, GND del UNO</td></tr>
+            <tr><td>D2</td><td>Punto de unión del divisor (datos del UNO)</td></tr>
+            <tr><td>D6</td><td>Buzzer +</td></tr>
+            <tr><td>D7</td><td>595 pata 14 (DS)</td></tr>
+            <tr><td>D8</td><td>595 pata 11 (SH_CP)</td></tr>
+            <tr><td>D0</td><td>595 pata 12 (ST_CP)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="box tw">
+        <h2>Arduino UNO (control)</h2>
+        <table>
+          <thead><tr><th>Pin</th><th>Va a</th></tr></thead>
+          <tbody>
+            <tr><td>USB</td><td>Alimentación (su propio cable)</td></tr>
+            <tr><td>5V</td><td>Solo el +5V del joystick</td></tr>
+            <tr><td>GND</td><td>Joystick, botón y GND del ESP</td></tr>
+            <tr><td>A0 / A1</td><td>Joystick VRx / VRy</td></tr>
+            <tr><td>2</td><td>Joystick SW</td></tr>
+            <tr><td>3</td><td>Botón de ataque</td></tr>
+            <tr><td>1 (TX)</td><td>1 kΩ → divisor → D2 del ESP</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+// ===== Dibujo del protoboard de la consola (vista superior) =====
+(() => {
+  const NS = "http://www.w3.org/2000/svg", svg = document.getElementById("pb");
+  const P = 14, X = c => 60 + (c - 1) * P;
+  const RY = { P:34, M:48, a:78, b:92, c:106, d:120, e:134, f:176, g:190, h:204, i:218, j:232, m:262, p:276 };
+  const pt = (c, r) => [X(c), RY[r]];
+  function el(tag, attrs, parent = svg, text) {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (text !== undefined) n.textContent = text;
+    parent.appendChild(n); return n;
+  }
+  const C = { red:"#e63946", blue:"#2f6fdc", cyan:"#19c3d6", green:"#2a9d3f", yellow:"#f4c430", orange:"#f3722c", v5:"#ff9b3d" };
+
+  // placa
+  el("rect", { x:30, y:16, width:886, height:276, rx:10, fill:"#ebe6da", stroke:"#cfc8b8" });
+  el("rect", { x:30, y:RY.e + 12, width:886, height:RY.f - RY.e - 24, fill:"#d9d3c4" });
+  el("line", { x1:50, y1:24, x2:900, y2:24, stroke:C.red, "stroke-width":1.5 });
+  el("line", { x1:50, y1:58, x2:900, y2:58, stroke:C.blue, "stroke-width":1.5 });
+  el("line", { x1:50, y1:252, x2:900, y2:252, stroke:C.red, "stroke-width":1.5 });
+  el("line", { x1:50, y1:286, x2:900, y2:286, stroke:C.blue, "stroke-width":1.5 });
+  for (let c = 1; c <= 60; c++) for (const r of Object.keys(RY))
+    el("rect", { x:X(c) - 2.5, y:RY[r] - 2.5, width:5, height:5, rx:1, fill:"#4a463e" });
+  const lab = { "font-size":8, fill:"#7a7466", "text-anchor":"middle", style:"font-family:var(--fm)" };
+  for (const c of [1,5,10,15,20,25,30,35,40,45,50,55,60]) {
+    el("text", { ...lab, x:X(c), y:69 }, svg, c);
+    el("text", { ...lab, x:X(c), y:247 }, svg, c);
+  }
+  for (const r of "abcdefghij") el("text", { ...lab, x:X(60) + 16, y:RY[r] + 3 }, svg, r);
+  [["P","+",C.red],["M","−",C.blue],["m","+",C.red],["p","−",C.blue]].forEach(([r,s,col]) =>
+    el("text", { x:42, y:RY[r] + 4, "font-size":12, "font-weight":700, fill:col, "text-anchor":"middle" }, svg, s));
+
+  // NodeMCU (columnas 1-15)
+  const TOP = ["Vin","GND","RST","EN","3V3","GND","CLK","SD0","CMD","SD1","SD2","SD3","RSV","RSV","A0"];
+  const BOT = ["3V3","GND","TX","RX","D8","D7","D6","D5","GND","3V3","D4","D3","D2","D1","D0"];
+  const USED_T = new Set([1,5,6]), USED_B = new Set([1,2,5,6,7,13,15]);
+  el("rect", { x:X(1) - 28, y:(RY.b + RY.i) / 2 - 10, width:22, height:20, rx:2, fill:"#c4c4c4", stroke:"#888" });
+  el("rect", { x:X(1) - 12, y:RY.b - 9, width:X(15) - X(1) + 21, height:RY.i - RY.b + 18, rx:4, fill:"#1d3557", stroke:"#0f1e33" });
+  el("rect", { x:X(8) - 4, y:126, width:X(14) - X(8) + 8, height:58, rx:2, fill:"#b9c0c8", stroke:"#8a929b" });
+  el("text", { x:(X(8) + X(14)) / 2, y:158, "font-size":9, fill:"#2b3440", "text-anchor":"middle", "font-weight":600 }, svg, "ESP-12E");
+  el("text", { x:(X(1) + X(7)) / 2, y:152, "font-size":10, fill:"#eef3f8", "text-anchor":"middle", "font-weight":600 }, svg, "NodeMCU");
+  el("text", { x:(X(1) + X(7)) / 2, y:166, "font-size":7.5, fill:"#9fb2c8", "text-anchor":"middle" }, svg, "← USB");
+  for (let c = 1; c <= 15; c++) {
+    for (const r of ["b","i"]) el("rect", { x:X(c) - 3, y:RY[r] - 3, width:6, height:6, fill:"#d4af37" });
+    const ut = USED_T.has(c), ub = USED_B.has(c);
+    el("text", { x:X(c) + 3, y:RY.b + 7, "font-size":7, fill:ut ? "#ffd166" : "#b8c7d9", "font-weight":ut ? 700 : 400, transform:`rotate(90 ${X(c) + 3} ${RY.b + 7})` }, svg, TOP[c - 1]);
+    el("text", { x:X(c) + 3, y:RY.i - 7, "font-size":7, fill:ub ? "#ffd166" : "#b8c7d9", "font-weight":ub ? 700 : 400, transform:`rotate(-90 ${X(c) + 3} ${RY.i - 7})` }, svg, BOT[c - 1]);
+  }
+
+  // 74HC595 (columnas 19-26, muesca a la derecha)
+  el("rect", { x:X(19) - 7, y:RY.e - 6, width:X(26) - X(19) + 14, height:RY.f - RY.e + 12, rx:2, fill:"#2b2b2b" });
+  el("circle", { cx:X(26) + 7, cy:(RY.e + RY.f) / 2, r:5, fill:"#d9d3c4" });
+  const T595 = ["G","Q7","Q6","Q5","Q4","Q3","Q2","Q1"], B595 = ["–","MR","SH","ST","OE","DS","Q0","V+"];
+  for (let k = 0; k < 8; k++) {
+    const x = X(19 + k);
+    el("rect", { x:x - 2.5, y:RY.e - 3, width:5, height:5, fill:"#c0c0c0" });
+    el("rect", { x:x - 2.5, y:RY.f - 2, width:5, height:5, fill:"#c0c0c0" });
+    el("text", { x, y:RY.e + 11, "font-size":5.2, fill:"#cfcfcf", "text-anchor":"middle" }, svg, T595[k]);
+    el("text", { x, y:RY.f - 6, "font-size":5.2, fill:"#cfcfcf", "text-anchor":"middle" }, svg, B595[k]);
+  }
+  el("text", { x:(X(19) + X(26)) / 2, y:(RY.e + RY.f) / 2 + 3, "font-size":8, fill:"#e6e6e6", "text-anchor":"middle", "font-weight":600 }, svg, "74HC595");
+
+  // buzzer (columnas 46-49)
+  const bx = (X(46) + X(49)) / 2;
+  el("circle", { cx:bx, cy:RY.h, r:21, fill:"#161616", stroke:"#000" });
+  el("circle", { cx:bx, cy:RY.h, r:5, fill:"#333" });
+  el("text", { x:bx - 13, y:RY.h - 8, "font-size":10, fill:"#fff", "font-weight":700 }, svg, "+");
+
+  // resistencias
+  const B220 = ["#d62828","#d62828","#6b3e1e","#c9a43a"];
+  const B1K  = ["#6b3e1e","#1a1a1a","#d62828","#c9a43a"];
+  function res(c1, r1, c2, r2, bandas = B1K) {
+    const [x1, y1] = pt(c1, r1), [x2, y2] = pt(c2, r2);
+    const d = Math.hypot(x2 - x1, y2 - y1), L = Math.min(d - 8, 24), a = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+    el("line", { x1, y1, x2, y2, stroke:"#8f8f8f", "stroke-width":1.6 });
+    const g = el("g", { transform:`translate(${(x1 + x2) / 2} ${(y1 + y2) / 2}) rotate(${a})` });
+    el("rect", { x:-L / 2, y:-4, width:L, height:8, rx:3, fill:"#d8c49a", stroke:"#9a8458", "stroke-width":.8 }, g);
+    [[bandas[0],-.32],[bandas[1],-.14],[bandas[2],.04],[bandas[3],.3]].forEach(([col, f]) =>
+      el("rect", { x:f * L - 1.2, y:-4, width:2.4, height:8, fill:col }, g));
+    for (const [x, y] of [[x1, y1], [x2, y2]]) el("circle", { cx:x, cy:y, r:1.8, fill:"#777" });
+  }
+  res(52,"i",54,"i"); res(54,"g",56,"g"); res(56,"j",56,"p");
+  for (let c = 29; c <= 43; c += 2) res(c,"j",c,"p",B220);
+
+  // LEDs
+  for (let c = 29; c <= 43; c += 2) {
+    const x = X(c), col = c <= 33 ? "#e63946" : "#f4b740", y = (RY.e + RY.f) / 2;
+    el("line", { x1:x, y1:RY.e, x2:x, y2:RY.f, stroke:"#9a9a9a", "stroke-width":1.4 });
+    el("circle", { cx:x, cy:y, r:6.2, fill:col, stroke:"#00000055" });
+    el("circle", { cx:x - 2, cy:y - 2, r:1.8, fill:"#ffffffaa" });
+  }
+
+  // cables
+  function wire(c1, r1, c2, r2, col, lift = 0) {
+    const [x1, y1] = pt(c1, r1), [x2, y2] = pt(c2, r2);
+    const d = `M${x1} ${y1} Q${(x1 + x2) / 2} ${(y1 + y2) / 2 + lift} ${x2} ${y2}`;
+    el("path", { d, fill:"none", stroke:"#1e1e1e", "stroke-width":4.6, "stroke-linecap":"round", opacity:.85 });
+    el("path", { d, fill:"none", stroke:col, "stroke-width":2.8, "stroke-linecap":"round" });
+    for (const [x, y] of [[x1, y1], [x2, y2]]) el("circle", { cx:x, cy:y, r:2.6, fill:col, stroke:"#1e1e1e", "stroke-width":1 });
+  }
+  function offboard(c, r, col, label, toY) {
+    const [x, y] = pt(c, r);
+    for (const [s, w] of [["#1e1e1e", 4.6], [col, 2.8]])
+      el("path", { d:`M${x} ${y} V${toY}`, stroke:s, "stroke-width":w, "stroke-linecap":"round", fill:"none" });
+    el("circle", { cx:x, cy:y, r:2.6, fill:col, stroke:"#1e1e1e", "stroke-width":1 });
+    el("text", { x:toY < 0 ? x - 6 : x, y:toY < 0 ? toY - 8 : toY + 14, "font-size":10, fill:"#dde7e4", "text-anchor":toY < 0 ? "start" : "middle", style:"font-family:var(--fm)" }, svg, label);
+  }
+  wire(5,"a",5,"P",C.red); wire(6,"a",6,"M",C.blue);
+  wire(1,"j",1,"m",C.red); wire(2,"j",2,"p",C.blue);
+  wire(19,"a",19,"M",C.blue);
+  wire(26,"j",26,"m",C.red); wire(20,"j",20,"m",C.red); wire(23,"j",23,"p",C.blue);
+  wire(15,"j",22,"h",C.cyan,14); wire(5,"j",21,"i",C.cyan,24); wire(6,"j",24,"i",C.cyan,34);
+  wire(26,"d",31,"d",C.green,-8);  wire(25,"c",33,"c",C.green,-12);
+  wire(24,"d",35,"d",C.green,-18); wire(23,"c",37,"c",C.green,-22);
+  wire(22,"b",39,"b",C.green,-24); wire(21,"d",41,"d",C.green,-34);
+  wire(20,"b",43,"b",C.green,-40); wire(25,"g",29,"c",C.green,0);
+  wire(7,"j",46,"j",C.yellow,48); wire(49,"j",49,"p",C.blue);
+  wire(30,"m",32,"m",C.red,-10); wire(30,"p",32,"p",C.blue,10);
+  wire(54,"h",13,"j",C.orange,70);
+  offboard(52,"j",C.orange,"TX del UNO",318);
+  offboard(59,"p",C.blue,"GND del UNO",318);
+})();
+
+(() => {
+  const steps = [...document.querySelectorAll(".step[data-step]")];
+  const total = steps.length;
+  const bar = document.getElementById("pbar"), txt = document.getElementById("ptxt");
+  function load(k){ try { return localStorage.getItem(k) === "1"; } catch(e) { return false; } }
+  function save(k,v){ try { localStorage.setItem(k, v ? "1" : "0"); } catch(e) {} }
+  function refresh(){
+    let n = 0;
+    steps.forEach(s => { const c = s.querySelector("input"); s.classList.toggle("is-done", c.checked); if(c.checked) n++; });
+    bar.style.width = (n/total*100) + "%";
+    txt.textContent = n === total ? "¡Circuito completo!" : `${n} de ${total} pasos`;
+  }
+  steps.forEach(s => {
+    const c = s.querySelector("input"), key = "kp-armado-v2-" + s.dataset.step;
+    c.checked = load(key);
+    c.addEventListener("change", () => { save(key, c.checked); refresh(); });
+  });
+  refresh();
+})();
+</script>

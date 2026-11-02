@@ -19,7 +19,8 @@ Juego de plataformas con desplazamiento lateral, al estilo de Mario Bros o Metal
 | Guía de armado del protoboard | ✅ `docs/guia_armado.html` |
 | Póster (Overleaf) | ✅ `poster/poster.tex` |
 | Firmware del ESP8266 con el juego de plataformas | 🔧 en desarrollo |
-| Simulación en Wokwi (ESP32) | 🔧 en desarrollo |
+| Simulación del circuito en Wokwi (ESP32, con protoboard) | ✅ `wokwi/` (programa de prueba de componentes) |
+| El juego completo dentro de la simulación | 🔧 en desarrollo |
 
 ---
 
@@ -34,6 +35,7 @@ Kernel_Panic_Game/
 │   ├── Prueba2_Buzzer/          Buzzer
 │   └── Prueba4_UART_UNO/        Recepción de los datos del UNO
 ├── docs/guia_armado.html        Guía paso a paso del circuito (abrir en el navegador)
+├── wokwi/                       Simulación en Wokwi: diagram.json (protoboard) y sketch.ino
 └── poster/                      Póster en LaTeX para Overleaf
 ```
 

@@ -180,7 +180,7 @@ input:focus-visible{outline:2px solid var(--dat);outline-offset:2px}
     <div class="step-h"><h3 style="color:var(--copper)">Vista del protoboard de la consola</h3></div>
     <p class="tip" style="max-width:72ch">Así queda la consola armada, vista desde arriba. Las columnas van de 1 a 60 y las filas de la <b>a</b> a la <b>e</b> (arriba) y de la <b>f</b> a la <b>j</b> (abajo). El UNO y el control quedan afuera del protoboard; del UNO llegan solo dos cables: TX y GND. Los nombres de los pines del NodeMCU pueden variar entre clones: <b>confirmalos con lo impreso en tu placa</b>.</p>
     <p class="note" style="max-width:72ch"><b>Ojo con tu protoboard:</b> del lado de los LEDs, la fila <b>+ (línea roja) es la de adentro</b> y la <b>− (línea azul) la de afuera</b>, como en el dibujo. Guiate siempre por el color de la línea, no por la posición. Si la línea roja y la azul están <b>cortadas a la mitad</b> del protoboard, las filas están partidas en dos: uní cada mitad con un cable corto (rojo con rojo y azul con azul), como los dos puentes de la columna 30. Si no estás seguro, ponelos igual: no molestan.</p>
-    <div class="fig board-fig"><svg id="pb" viewBox="0 -40 940 385" role="img" aria-label="Vista superior del protoboard: NodeMCU en las columnas 1 a 15, 74HC595 en 19 a 26, LEDs en las columnas impares de 29 a 43, buzzer en 46 a 49 y divisor de tensión en 52 a 49"></svg></div>
+    <div class="fig board-fig"><svg id="pb" viewBox="0 -40 940 385" role="img" aria-label="Vista superior del protoboard: NodeMCU en las columnas 1 a 15, 74HC595 en 19 a 26, LEDs en las columnas impares de 29 a 43, buzzer en 46 a 49, divisor de tensión en 52 a 56 y botón de disparo en 58 a 60"></svg></div>
     <div class="tbls" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
       <div class="box tw">
         <h2>Alimentación</h2>
@@ -230,6 +230,9 @@ input:focus-visible{outline:2px solid var(--dat);outline-offset:2px}
           <tr><td>j56 → fila − abajo</td><td>1 kΩ</td></tr>
           <tr><td>h54 → j13</td><td>punto de unión → D2</td></tr>
           <tr><td>fila − abajo, col. 59 ← GND del UNO</td><td>GND común</td></tr>
+          <tr><td>d58 · d60 · g58 · g60</td><td>botón de disparo, sobre la ranura</td></tr>
+          <tr><td>a58 ← pin 3 del UNO</td><td>una pata del botón</td></tr>
+          <tr><td>j60 → fila − abajo</td><td>la pata en diagonal, a GND</td></tr>
         </tbody></table>
       </div>
     </div>
@@ -391,7 +394,7 @@ input:focus-visible{outline:2px solid var(--dat);outline-offset:2px}
         <text class="m" x="80" y="204" text-anchor="middle">Joystick</text>
         <circle class="blk" cx="205" cy="140" r="26"/>
         <circle cx="205" cy="140" r="14" fill="#c0392b" stroke="#111"/>
-        <text class="m" x="205" y="186" text-anchor="middle">Ataque</text>
+        <text class="m" x="205" y="186" text-anchor="middle">Disparo</text><text class="m" x="205" y="200" text-anchor="middle">(en el protoboard)</text>
 
         <rect class="blk" x="510" y="40" width="170" height="230" rx="6"/>
         <text class="t" x="595" y="64" text-anchor="middle">Arduino UNO</text>
@@ -413,8 +416,8 @@ input:focus-visible{outline:2px solid var(--dat);outline-offset:2px}
         <text class="m" x="390" y="144" text-anchor="middle">VRx · eje X</text>
         <text class="m" x="390" y="174" text-anchor="middle">VRy · eje Y</text>
         <text class="m" x="390" y="204" text-anchor="middle">SW · pulsador</text>
-        <text class="m" x="390" y="234" text-anchor="middle">botón de ataque</text>
-        <text class="m" x="390" y="276" text-anchor="middle">cable de 6 hilos, 30 a 50 cm</text>
+        <text class="m" x="390" y="234" text-anchor="middle">botón de disparo (la otra pata a GND)</text>
+        <text class="m" x="390" y="276" text-anchor="middle">pin 0 (RX) del UNO: siempre vacío</text>
       </svg>
     </div>
     <div class="cols">
@@ -423,8 +426,9 @@ input:focus-visible{outline:2px solid var(--dat);outline-offset:2px}
         <ul>
           <li>Montá el joystick a la izquierda y el botón a la derecha de una tablita, un cartón duro o un protoboard mini, como un gamepad. El KY-023 tiene 4 agujeros para atornillarlo o pegarlo.</li>
           <li>Con cables macho-hembra largos: <span class="pin">GND → GND</span>, <span class="pin">+5V → 5V</span>, <span class="pin">VRx → A0</span>, <span class="pin">VRy → A1</span>, <span class="pin">SW → 2</span>.</li>
-          <li>Botón: una pata al <span class="pin">pin 3</span> del UNO y la otra al mismo GND del joystick (un puente corto en el control). Así el cable lleva 6 hilos.</li>
-          <li>Encintá los 6 cables juntos cada 10 cm para que queden como un solo cable.</li>
+          <li>Botón de disparo: sus patas son cortas para tenerlo en la mano, así que va <b>en el protoboard</b>, sobre la ranura, en las columnas 58 y 60 (ver la vista del protoboard). Desde la línea de una pata, un cable al <span class="pin">pin 3</span> del UNO; desde la línea de la pata en diagonal, un cable a la fila <span class="pin">− azul</span>.</li>
+          <li>Pines digitales del UNO: <span class="pin">0</span> vacío, <span class="pin">1</span> divisor (paso 5), <span class="pin">2</span> SW, <span class="pin">3</span> botón.</li>
+          <li>Encintá los 5 cables del joystick juntos cada 10 cm para que queden como un solo cable.</li>
           <li>Todavía no conectes nada entre el UNO y el ESP.</li>
         </ul>
         <p class="tip"><b>Pulsadores de 4 patas:</b> usá dos patas en diagonal. Así siempre funcionan como interruptor, sin importar cómo lo pongas.</p>
@@ -435,7 +439,9 @@ input:focus-visible{outline:2px solid var(--dat);outline-offset:2px}
           <li>Se ven símbolos raros: el Monitor Serie no está en 38400.</li>
           <li>X e Y están cambiados: intercambiá los cables de A0 y A1.</li>
           <li>Un eje va al revés: lo corregís en el paso 7 con <code>INVERTIR_X</code> o <code>INVERTIR_Y</code>.</li>
-          <li>El botón siempre da 1: usá patas en diagonal y revisá que la otra pata vaya a GND.</li>
+          <li>El botón siempre da 1: revisá que esté en el pin 3 (no en el 2), que cada cable esté en la misma línea que una pata y que la otra pata vaya a GND.</li>
+          <li>El botón siempre da 0: los dos cables quedaron en patas unidas por dentro. Girá el botón un cuarto de vuelta.</li>
+          <li>X e Y quedan en 1023: falta el GND del joystick o está flojo.</li>
         </ul></div>
       </div>
     </div>
@@ -604,7 +610,8 @@ input:focus-visible{outline:2px solid var(--dat);outline-offset:2px}
             <tr><td>GND</td><td>Joystick, botón y GND del ESP</td></tr>
             <tr><td>A0 / A1</td><td>Joystick VRx / VRy</td></tr>
             <tr><td>2</td><td>Joystick SW</td></tr>
-            <tr><td>3</td><td>Botón de ataque</td></tr>
+            <tr><td>3</td><td>Botón de disparo (otra pata a GND)</td></tr>
+            <tr><td>0 (RX)</td><td>Vacío (lo usa el USB)</td></tr>
             <tr><td>1 (TX)</td><td>1 kΩ → divisor → D2 del ESP</td></tr>
           </tbody>
         </table>
@@ -733,6 +740,14 @@ input:focus-visible{outline:2px solid var(--dat);outline-offset:2px}
   wire(7,"j",46,"j",C.yellow,48); wire(49,"j",49,"p",C.blue);
   wire(30,"m",32,"m",C.red,-10); wire(30,"p",32,"p",C.blue,10);
   wire(54,"h",13,"j",C.orange,70);
+
+  // botón de disparo (columnas 58-60, cruzando la ranura)
+  el("rect", { x:X(58) - 6, y:RY.d - 6, width:X(60) - X(58) + 12, height:RY.g - RY.d + 12, rx:3, fill:"#222", stroke:"#000" });
+  el("circle", { cx:X(59), cy:(RY.d + RY.g) / 2, r:11, fill:"#2f6fdc", stroke:"#163a7a" });
+  for (const [c, r] of [[58,"d"],[60,"d"],[58,"g"],[60,"g"]]) el("rect", { x:X(c) - 2.5, y:RY[r] - 2.5, width:5, height:5, fill:"#c0c0c0" });
+  wire(60,"j",60,"p",C.blue);
+  offboard(58,"a",C.yellow,"",-22);
+  el("text", { x:X(58) - 8, y:-14, "font-size":10, fill:"#dde7e4", "text-anchor":"end", style:"font-family:var(--fm)" }, svg, "Pin 3 del UNO");
   offboard(52,"j",C.orange,"TX del UNO",318);
   offboard(59,"p",C.blue,"GND del UNO",318);
 })();

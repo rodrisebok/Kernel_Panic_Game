@@ -1,15 +1,14 @@
 /*
   Prueba 2 · Buzzer (ESP8266)
-  Toca una escala y la melodía de "game over".
+  Toca una escala y un par de efectos de sonido del juego.
   - Si suena distinto en cada nota: es un buzzer PASIVO (ideal, hace melodías).
   - Si siempre suena el mismo pitido: es un buzzer ACTIVO. Sirve igual, pero sin tonos.
 
-  Conexión: buzzer + → D6, buzzer − → GND
+  Conexión: buzzer + → D6   ·   buzzer − → GND
 */
 
 const uint8_t PIN_BUZZER = D6;
-const int ESCALA[] = { 262, 294, 330, 349, 392, 440, 494, 523 };
-const int GAME_OVER[][2] = { {880, 150}, {660, 150}, {440, 150}, {220, 420} };
+const int NOTAS[] = { 262, 294, 330, 349, 392, 440, 494, 523 };
 
 void setup() {
   Serial.begin(115200);
@@ -18,8 +17,15 @@ void setup() {
 }
 
 void loop() {
-  for (int f : ESCALA) { Serial.println(f); tone(PIN_BUZZER, f, 200); delay(250); }
-  delay(500);
-  for (auto& n : GAME_OVER) { tone(PIN_BUZZER, n[0], n[1]); delay(n[1] + 30); }
-  delay(2000);
+  for (int i = 0; i < 8; i++) {          // escala ascendente
+    tone(PIN_BUZZER, NOTAS[i], 180);
+    Serial.println(NOTAS[i]);
+    delay(220);
+  }
+  delay(400);
+  tone(PIN_BUZZER, 1500, 60); delay(150);   // "disparo"
+  tone(PIN_BUZZER, 1800, 60); delay(150);
+  tone(PIN_BUZZER, 180, 300); delay(600);   // "daño"
+  noTone(PIN_BUZZER);
+  delay(1500);
 }

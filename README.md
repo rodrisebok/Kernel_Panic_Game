@@ -35,6 +35,7 @@ Kernel_Panic_Game/
 │   ├── Prueba2_Buzzer/          Buzzer
 │   └── Prueba4_UART_UNO/        Recepción de los datos del UNO
 ├── docs/guia_armado.html        Guía paso a paso del circuito (abrir en el navegador)
+├── docs/bitacora.md             Registro de las pruebas del circuito real, paso a paso
 ├── wokwi/                       Simulación en Wokwi: diagram.json (protoboard) y sketch.ino
 └── poster/                      Póster en LaTeX para Overleaf
 ```
@@ -172,6 +173,8 @@ La página pide `/estado` con `fetch()` cada 100 ms y dibuja lo que recibe en un
 | El UNO trabaja a 5 V y el ESP8266 a 3,3 V | Divisor de tensión con 3 resistencias de 1 kΩ en la señal TX, y cada placa alimentada por su propio USB |
 | Faltaban pines para 8 LEDs | 74HC595: 8 salidas con 3 pines |
 | `delay()` congela el servidor web | Reloj del juego con `millis()` |
+| El Arduino IDE no mostraba el puerto del NodeMCU | El cable USB era solo de carga; con otro cable apareció el chip CP2102 sin driver y se instaló el driver CP210x de Silicon Labs |
+| Los 5 LEDs amarillos no encendían | Estaban colocados al revés; se dieron vuelta (la pata larga va hacia la salida del 595) |
 | Wokwi no simula el ESP8266 | La simulación usa un ESP32, que además puede leer el joystick directamente |
 | Los LEDs de 5 mm no entran en columnas seguidas | Se ubican en columnas alternadas (29, 31, … 43) |
 | En el protoboard, las filas + y − de un lado están en orden inverso al dibujo | Se conecta siguiendo el color de la línea (roja = 3,3 V, azul = GND), no la posición |

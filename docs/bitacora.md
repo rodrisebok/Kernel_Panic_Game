@@ -7,7 +7,7 @@ Cada prueba usa un sketch de la carpeta `pruebas/` (o del Arduino UNO) y prueba 
 |---|---|---|---|
 | 1 | NodeMCU + 74HC595 + 8 LEDs | `pruebas/Prueba1_LEDs_595` | ✅ Superada |
 | 2 | Buzzer | `pruebas/Prueba2_Buzzer` | ✅ Superada |
-| 3 | Control: joystick y botón en el Arduino UNO | `arduino_uno/JoystickUNO` | ⏳ Pendiente |
+| 3 | Control: joystick y botón en el Arduino UNO | `pruebas/Prueba3_Control` y `arduino_uno/JoystickUNO` | ✅ Superada |
 | 4 | Divisor de tensión (medición con tester) | — | ⏳ Pendiente |
 | 5 | Comunicación UART UNO → ESP8266 | `pruebas/Prueba4_UART_UNO` | ⏳ Pendiente |
 | 6 | Juego completo con página web | firmware del juego | ⏳ Pendiente |
@@ -47,3 +47,23 @@ Cada prueba usa un sketch de la carpeta `pruebas/` (o del Arduino UNO) y prueba 
 **Resultado obtenido:** la melodía suena correctamente; cada nota tiene una altura distinta, así que el buzzer es **pasivo** y puede reproducir melodías.
 
 **Observación:** durante esta prueba quedó encendido un LED amarillo. Es normal: el sketch del buzzer no usa el 74HC595, y el chip conserva el último valor que recibió hasta que le llega uno nuevo.
+
+---
+
+## Prueba 3 · Control: joystick y botón en el Arduino UNO — 10/11/2026 ✅
+
+**Objetivo:** comprobar que el Arduino UNO lee los dos ejes del joystick (A0 y A1), el pulsador SW (pin 2) y el botón de disparo (pin 3).
+
+**Resultado esperado:** con la palanca suelta, cada eje cerca de 512; en los extremos, 0 y 1023. Cada botón vale 1 suelto y 0 presionado (`INPUT_PULLUP`).
+
+**Resultado obtenido:** los dos ejes recorren de 0 a 1023 y los dos botones responden correctamente.
+
+**Problemas encontrados y cómo se resolvieron:**
+
+1. **"Acceso denegado" al cargar en COM4.** El Monitor Serie tenía el puerto abierto. Se cerró y la carga funcionó.
+2. **Los dos ejes quedaban fijos en 1023.** Sin GND, los potenciómetros del joystick quedan en 5 V. El cable de GND estaba flojo: funcionaba solo al inclinar el módulo (falso contacto). Se ajustaron las puntas y se pasó el GND a la tira POWER del UNO.
+3. **El botón de disparo daba siempre 0.** Las dos patas usadas estaban unidas por dentro del pulsador. Se giró el botón un cuarto de vuelta.
+4. **El botón de disparo no cambiaba nunca.** Su cable estaba en el pin 2 (el del SW del joystick) en lugar del pin 3. Se movió al pin 3.
+5. **El botón no se podía sostener en la mano** porque sus patas son muy cortas. Se ubicó en el protoboard, sobre la ranura (columnas 58 y 60), con una pata al pin 3 y la diagonal a GND.
+
+**Programa de diagnóstico:** `pruebas/Prueba3_Control` muestra en el Monitor Serie (9600 baudios) los valores de los ejes, la dirección y el estado de cada botón con texto.

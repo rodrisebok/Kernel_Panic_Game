@@ -6,7 +6,7 @@ Cada prueba usa un sketch de la carpeta `pruebas/` (o del Arduino UNO) y prueba 
 | # | Prueba | Sketch | Estado |
 |---|---|---|---|
 | 1 | NodeMCU + 74HC595 + 8 LEDs | `pruebas/Prueba1_LEDs_595` | ✅ Superada |
-| 2 | Buzzer | `pruebas/Prueba2_Buzzer` | ⏳ Pendiente |
+| 2 | Buzzer | `pruebas/Prueba2_Buzzer` | ✅ Superada |
 | 3 | Control: joystick y botón en el Arduino UNO | `arduino_uno/JoystickUNO` | ⏳ Pendiente |
 | 4 | Divisor de tensión (medición con tester) | — | ⏳ Pendiente |
 | 5 | Comunicación UART UNO → ESP8266 | `pruebas/Prueba4_UART_UNO` | ⏳ Pendiente |
@@ -33,3 +33,17 @@ Cada prueba usa un sketch de la carpeta `pruebas/` (o del Arduino UNO) y prueba 
    - Como fallaban los 5 a la vez, se buscó una causa común.
    - Los LEDs amarillos estaban colocados al revés (pata larga del lado de GND). Un LED invertido no se daña, simplemente no conduce.
    - Se dieron vuelta y encendieron los 8.
+
+---
+
+## Prueba 2 · Buzzer — 10/11/2026 ✅
+
+**Objetivo:** comprobar que el ESP8266 genera sonidos en el buzzer con `tone()` desde el pin D6.
+
+**Primera versión:** una escala de 8 notas y dos efectos (disparo y daño). Funcionó.
+
+**Versión final:** se reemplazó la escala por una melodía original estilo chiptune, el *"Tema de Kernel Panic"*, que después se usa como música del menú del juego. Cada nota se guarda como un par (frecuencia, duración) y se reproduce con `tone()`.
+
+**Resultado obtenido:** la melodía suena correctamente; cada nota tiene una altura distinta, así que el buzzer es **pasivo** y puede reproducir melodías.
+
+**Observación:** durante esta prueba quedó encendido un LED amarillo. Es normal: el sketch del buzzer no usa el 74HC595, y el chip conserva el último valor que recibió hasta que le llega uno nuevo.

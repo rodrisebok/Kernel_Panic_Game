@@ -8,7 +8,7 @@ Cada prueba usa un sketch de la carpeta `pruebas/` (o del Arduino UNO) y prueba 
 | 1 | NodeMCU + 74HC595 + 8 LEDs | `pruebas/Prueba1_LEDs_595` | ✅ Superada |
 | 2 | Buzzer | `pruebas/Prueba2_Buzzer` | ✅ Superada |
 | 3 | Control: joystick y botón en el Arduino UNO | `pruebas/Prueba3_Control` y `arduino_uno/JoystickUNO` | ✅ Superada |
-| 4 | Divisor de tensión (medición con tester) | — | ⏳ Pendiente |
+| 4 | Divisor de tensión (medición con tester) | — | ✅ Superada |
 | 5 | Comunicación UART UNO → ESP8266 | `pruebas/Prueba4_UART_UNO` | ⏳ Pendiente |
 | 6 | Juego completo con página web | firmware del juego | ⏳ Pendiente |
 
@@ -67,3 +67,22 @@ Cada prueba usa un sketch de la carpeta `pruebas/` (o del Arduino UNO) y prueba 
 5. **El botón no se podía sostener en la mano** porque sus patas son muy cortas. Se ubicó en el protoboard, sobre la ranura (columnas 58 y 60), con una pata al pin 3 y la diagonal a GND.
 
 **Programa de diagnóstico:** `pruebas/Prueba3_Control` muestra en el Monitor Serie (9600 baudios) los valores de los ejes, la dirección y el estado de cada botón con texto.
+
+---
+
+## Prueba 4 · Divisor de tensión — 10/11/2026 ✅
+
+**Objetivo:** antes de unir las placas, comprobar que la señal del TX del UNO (5 V) llega al ESP8266 reducida a un nivel seguro (3,3 V como máximo).
+
+**Montaje:** TX del UNO → 1 kΩ → punto de unión → 1 kΩ → 1 kΩ → GND. El cable de D2 del NodeMCU sale del punto de unión. Solo el UNO estaba alimentado (por USB, corriendo `JoystickUNO`); el NodeMCU todavía desconectado.
+
+**Mediciones** (tester en V⎓, escala 20 V, punta negra en GND):
+
+| Punto | Esperado | Medido |
+|---|---|---|
+| Entrada del divisor (TX del UNO) | 4,5 – 5 V | **4,40 V** |
+| Punto de unión (hacia D2) | Entrada × 2/3 | **2,93 V** |
+
+**Cálculo:** V<sub>salida</sub> = V<sub>entrada</sub> × 2 kΩ / (1 kΩ + 2 kΩ) = 4,40 V × 2/3 ≈ 2,93 V. El valor medido coincide con el calculado.
+
+**Conclusión:** 2,93 V no supera los 3,3 V del ESP8266, y alcanza para que lo reconozca como un "1" lógico (el umbral está alrededor de 2,5 V). El TX del UNO queda en 4,4 V y no en 5 V por la alimentación del USB y la pequeña corriente del divisor (≈ 1,5 mA); es normal.

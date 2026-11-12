@@ -9,7 +9,7 @@ Cada prueba usa un sketch de la carpeta `pruebas/` (o del Arduino UNO) y prueba 
 | 2 | Buzzer | `pruebas/Prueba2_Buzzer` | ✅ Superada |
 | 3 | Control: joystick y botón en el Arduino UNO | `pruebas/Prueba3_Control` y `arduino_uno/JoystickUNO` | ✅ Superada |
 | 4 | Divisor de tensión (medición con tester) | — | ✅ Superada |
-| 5 | Comunicación UART UNO → ESP8266 | `pruebas/Prueba4_UART_UNO` | ⏳ Pendiente |
+| 5 | Comunicación UART UNO → ESP8266 | `pruebas/Prueba4_UART_UNO` | ✅ Superada |
 | 6 | Juego completo con página web | firmware del juego | ⏳ Pendiente |
 
 ---
@@ -86,3 +86,20 @@ Cada prueba usa un sketch de la carpeta `pruebas/` (o del Arduino UNO) y prueba 
 **Cálculo:** V<sub>salida</sub> = V<sub>entrada</sub> × 2 kΩ / (1 kΩ + 2 kΩ) = 4,40 V × 2/3 ≈ 2,93 V. El valor medido coincide con el calculado.
 
 **Conclusión:** 2,93 V no supera los 3,3 V del ESP8266, y alcanza para que lo reconozca como un "1" lógico (el umbral está alrededor de 2,5 V). El TX del UNO queda en 4,4 V y no en 5 V por la alimentación del USB y la pequeña corriente del divisor (≈ 1,5 mA); es normal.
+
+---
+
+## Prueba 5 · Comunicación UART del UNO al ESP8266 — 12/11/2026 ✅
+
+**Objetivo:** comprobar que el ESP8266 recibe los datos del joystick que envía el Arduino UNO.
+
+**Montaje:** cada placa con su propio USB. El UNO corre `JoystickUNO` y envía `X,Y,SW,BOTON` 50 veces por segundo a 38400 baudios por su TX. La señal pasa por el divisor (2,93 V) y entra al ESP8266 por D2, que la lee con `SoftwareSerial`. GND común entre las dos placas.
+
+**Resultado obtenido:** el Monitor Serie del NodeMCU (115200 baudios) muestra los valores del joystick y de los botones en tiempo real, y la dirección calculada con la zona muerta.
+
+**Problemas encontrados y cómo se resolvieron:**
+
+1. **El Arduino IDE mostraba las dos placas como "NodeMCU".** El IDE no reconoce automáticamente el UNO clon; hay que elegir la placa y el puerto a mano antes de cada carga. Se identificaron los puertos en el Administrador de dispositivos: COM3 = NodeMCU (CP2102), COM4 = Arduino UNO.
+2. **"Failed to connect to ESP8266: Invalid head of packet".** Se estaba cargando el programa del ESP en el COM4, que es el UNO. Con el COM3 la carga funcionó.
+
+**Conclusión:** toda la cadena de entrada funciona: joystick → conversor analógico-digital del UNO → UART → divisor de tensión → ESP8266.

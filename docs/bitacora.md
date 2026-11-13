@@ -10,7 +10,7 @@ Cada prueba usa un sketch de la carpeta `pruebas/` (o del Arduino UNO) y prueba 
 | 3 | Control: joystick y botón en el Arduino UNO | `pruebas/Prueba3_Control` y `arduino_uno/JoystickUNO` | ✅ Superada |
 | 4 | Divisor de tensión (medición con tester) | — | ✅ Superada |
 | 5 | Comunicación UART UNO → ESP8266 | `pruebas/Prueba4_UART_UNO` | ✅ Superada |
-| 6 | Juego completo con página web | firmware del juego | ⏳ Pendiente |
+| 6 | Juego completo con página web | `firmware/KernelPanic` | ✅ Superada |
 
 ---
 
@@ -103,3 +103,26 @@ Cada prueba usa un sketch de la carpeta `pruebas/` (o del Arduino UNO) y prueba 
 2. **"Failed to connect to ESP8266: Invalid head of packet".** Se estaba cargando el programa del ESP en el COM4, que es el UNO. Con el COM3 la carga funcionó.
 
 **Conclusión:** toda la cadena de entrada funciona: joystick → conversor analógico-digital del UNO → UART → divisor de tensión → ESP8266.
+
+---
+
+## Prueba 6 · Juego completo con página web — 13/11/2026 ✅
+
+**Objetivo:** jugar una partida completa con todo el sistema funcionando junto: control en el UNO, juego en el ESP8266, página web, LEDs y buzzer.
+
+**Montaje:** el circuito completo del protoboard. El UNO corre `JoystickUNO` y el NodeMCU el firmware `KernelPanic`. La página se abre desde el navegador con la dirección que muestra el Monitor Serie.
+
+**Resultado obtenido:**
+- La página muestra la intro con la historia; con SW empieza la partida.
+- K-1T camina, salta, se agacha y dispara con el joystick y el botón, y recorre las 4 zonas.
+- NÚCLEO-0 pasa a la fase 2 a mitad de vida, y al eliminarlo se abre la CPU.
+- Los LEDs muestran las vidas y el avance, y el buzzer suena con cada evento.
+- El panel de la página muestra en tiempo real los ejes, la dirección, los pulsadores, los LEDs, el buzzer y las líneas UART recibidas.
+
+**Problemas encontrados y cómo se resolvieron:**
+
+1. **Los controles respondían al revés** (derecha movía hacia abajo, izquierda hacia arriba). El joystick está girado en el protoboard. Se agregaron en `config.h` las opciones `INTERCAMBIAR_EJES`, `INVERTIR_X` e `INVERTIR_Y` para corregir la orientación sin tocar el cableado.
+2. **Los botones respondían a veces sí y a veces no.** Había cables flojos. Además, para que una línea dañada no se tome como una pulsación, se bajó la velocidad de la UART de 38400 a 19200 baudios y se agregó un valor de control a cada línea: `X,Y,SW,BOTON,CONTROL`. El ESP descarta las líneas que no cierran.
+3. **El botón de disparo dejó de funcionar.** Su cable de GND estaba en la línea positiva del protoboard. Al pasarlo a la línea negativa volvió a funcionar.
+
+**Conclusión:** el sistema completo funciona: joystick → UNO → UART → divisor → ESP8266 → juego → página web, LEDs y buzzer.

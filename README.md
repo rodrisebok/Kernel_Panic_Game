@@ -18,7 +18,7 @@ Juego de plataformas con desplazamiento lateral, al estilo de Mario Bros o Metal
 | Programas de prueba por componente | ✅ `pruebas/` |
 | Guía de armado del protoboard | ✅ `docs/guia_armado.html` |
 | Póster (Overleaf) | ✅ `poster/poster.tex` |
-| Firmware del ESP8266 con el juego de plataformas | ✅ `firmware/KernelPanic` (falta la prueba final en el hardware) |
+| Firmware del ESP8266 con el juego de plataformas | ✅ `firmware/KernelPanic` (probado en el hardware, ver `docs/bitacora.md`) |
 | Simulación en Cirkit Designer (Arduino UNO + ESP32-S3) | ✅ `cirkit/` |
 | Simulación del circuito en Wokwi (ESP32, con protoboard) | ✅ `wokwi/` (programa de prueba de componentes) |
 | El juego completo dentro de la simulación | 🔧 en desarrollo |

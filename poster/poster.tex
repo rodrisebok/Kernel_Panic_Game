@@ -89,7 +89,7 @@
       \vspace{0.5ex}
       Si $|\Delta x| > |\Delta y|$ la dirección es izquierda o derecha; si no, arriba o abajo.
 
-      \item \textbf{Lectura con dos placas:} el ESP8266 tiene una sola entrada analógica, por eso un Arduino UNO lee los dos ejes y los envía por UART a 38400 baudios con el formato \texttt{X,Y,SW,BOTON}. Como el UNO trabaja a 5\,V y el ESP8266 a 3,3\,V, la señal pasa por un divisor de tensión:
+      \item \textbf{Lectura con dos placas:} el ESP8266 tiene una sola entrada analógica, por eso un Arduino UNO lee los dos ejes y los envía por UART a 19200 baudios con el formato \texttt{X,Y,SW,BOTON,CONTROL}; el valor de control permite descartar las líneas que llegan dañadas. Como el UNO trabaja a 5\,V y el ESP8266 a 3,3\,V, la señal pasa por un divisor de tensión:
 
       \vspace{0.5ex}
       \begin{center}
@@ -171,7 +171,7 @@
     \begin{itemize}
       \item \textbf{Entorno:} Arduino IDE, con funciones \texttt{setup()} y \texttt{loop()}. El juego avanza en ciclos de 50\,ms medidos con \texttt{millis()}, sin \texttt{delay()}, para que la lectura del joystick, los sonidos y la web no se bloqueen entre sí.
       \item \textbf{Circuito:} joystick y botón de disparo conectados al Arduino UNO; LEDs con resistencias de $220\,\Omega$ manejados por un 74HC595; buzzer en una salida digital; divisor de tensión con tres resistencias de $1\,\text{k}\Omega$. Cada placa se alimenta por su propio USB y solo comparten la señal TX y GND.
-      \item \textbf{Validación:} simulación en Wokwi, programas de prueba individuales (LEDs, buzzer y comunicación UART) y monitoreo de los valores por el Puerto Serial.
+      \item \textbf{Validación:} simulación en Wokwi y seis pruebas en el protoboard, una por componente. El divisor medido dio 4,40\,V $\to$ 2,93\,V, como indica el cálculo.
     \end{itemize}
 
     \heading{Herramientas Utilizadas}
@@ -179,19 +179,19 @@
       \item \textbf{Simulación:} Wokwi (con ESP32, ya que el simulador no incluye ESP8266).
       \item \textbf{Microcontroladores:} NodeMCU ESP8266 y Arduino UNO.
       \item \textbf{Hardware:} Joystick KY-023, pulsador, 74HC595, 8 LEDs, buzzer, resistencias, protoboard y cables.
-      \item \textbf{Software:} Arduino IDE, librería ArduinoJson y GitHub.
+      \item \textbf{Software:} Arduino IDE (sin bibliotecas externas) y GitHub.
     \end{itemize}
   \end{block}
 
   \begin{block}{4. Resultados Destacados}
-    El jugador controla a K-1T con el joystick físico mientras la página web muestra el escenario, el puntaje, el estado de la partida y la dirección detectada. Los LEDs y el buzzer acompañan cada evento del juego.
+    El jugador controla a K-1T con el joystick físico mientras la página web muestra el escenario, el puntaje, el estado de la partida y la dirección detectada. Los LEDs y el buzzer acompañan cada evento. Una intro cuenta la historia y el jefe final tiene dos fases.
 
     \heading{Interfaz Web y Simulación}
 
     \begin{figure}
         \centering
-        \includegraphics[width=0.6\columnwidth]{logos/juego.png}
-        \caption{Interfaz web del juego: zona Placa Madre.}
+        \includegraphics[width=0.46\columnwidth]{logos/juego.png}
+        \caption{Interfaz web del juego: NÚCLEO-0 en la fase 2, en la CPU.}
         \label{fig:web}
     \end{figure}
     \vspace{-2.5ex}
@@ -271,6 +271,7 @@
           \midrule
           Bit recolectado & +10 puntos, sonido corto \\
           Código corrupto / dron eliminado & +20 / +30 puntos \\
+          NÚCLEO-0 a mitad de vida & Escudo, alarma y fase 2 \\
           NÚCLEO-0 apagado & +500 puntos, se abre la CPU \\
           Daño recibido & Se apaga un LED de vida (Q0--Q2) \\
           Avance en el nivel & LEDs de progreso (Q3--Q7) \\
@@ -289,13 +290,13 @@
       \item \textbf{Integración completa:} el sistema une lectura analógica, lógica de juego, salidas físicas y una interfaz web actualizada en tiempo real, todo coordinado por el ESP8266.
       \item \textbf{Diseño seguro entre placas:} usar el Arduino UNO como lector del joystick resolvió la falta de una segunda entrada analógica, y el divisor de tensión protegió al ESP8266 de los 5\,V.
       \item \textbf{Programación no bloqueante:} el uso de \texttt{millis()} en lugar de \texttt{delay()} permitió atender el joystick, los sonidos y la web al mismo tiempo, sin cortes.
-      \item \textbf{Simulación previa:} probar en Wokwi antes del montaje redujo errores de conexión y evitó dañar componentes.
+      \item \textbf{Pruebas por etapas:} simular en Wokwi y probar cada componente por separado permitió encontrar rápido los errores de conexión sin dañar las placas.
     \end{itemize}
   \end{block}
 
   \begin{figure}
       \centering
-      \includegraphics[width=0.6\columnwidth,height=0.15\textheight,keepaspectratio]{logos/protoboard.jpg}
+      \includegraphics[width=0.6\columnwidth,height=0.11\textheight,keepaspectratio]{logos/protoboard.jpg}
       \caption{Montaje del circuito en protoboard.}
       \label{fig:proto}
   \end{figure}
@@ -306,12 +307,11 @@
       \item Arduino. (s.f.). \textit{Arduino Documentation}. https://docs.arduino.cc
       \item ESP8266 Community. (s.f.). \textit{ESP8266 Arduino Core Documentation}. https://arduino-esp8266.readthedocs.io
       \item Texas Instruments. (2021). \textit{SNx4HC595 8-Bit Shift Registers With 3-State Output Registers} [Hoja de datos]. https://www.ti.com/product/SN74HC595
-      \item Blanchon, B. (s.f.). \textit{ArduinoJson}. https://arduinojson.org
       \item Wokwi. (s.f.). \textit{Wokwi Docs}. https://docs.wokwi.com
       \item Universidad Nacional de Hurlingham (2026). \textit{Material de clase Arquitectura de Computadoras}.
       \item Normas APA. (s.f.). \textit{Guía de estilo APA - 7ª edición}. https://normas-apa.org
       \item Simulación: \href{https://wokwi.com/projects/REEMPLAZAR}{Pulsá para ingresar a la simulación en Wokwi}
-      \item Repositorio: \href{https://github.com/REEMPLAZAR}{Pulsá para ingresar al repositorio en GitHub}
+      \item Repositorio: \href{https://github.com/rodrisebok/Kernel_Panic_Game}{Pulsá para ingresar al repositorio en GitHub}
     \end{itemize}
   \end{block}
 

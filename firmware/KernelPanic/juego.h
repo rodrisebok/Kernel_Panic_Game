@@ -22,12 +22,12 @@ const char* const ESTADO_NOMBRE[] = { "MENU", "JUGANDO", "PAUSA", "PERDIDO", "GA
 enum TipoEnemigo : uint8_t { BUG, VIRUS, JEFE };
 
 // Avisos que la página muestra como cartel
-enum Aviso : uint8_t { AV_NADA, AV_JEFE, AV_CHECK, AV_JEFE_MUERTO, AV_VACIO };
+enum Aviso : uint8_t { AV_NADA, AV_JEFE, AV_CHECK, AV_JEFE_MUERTO, AV_VACIO, AV_FASE2 };
 
 // Eventos para los efectos visuales de la página (explosiones, textos que suben, etc.)
 enum TipoEvento : uint8_t {
   EV_BIT = 1, EV_PARCHE, EV_MUERTE, EV_GOLPE, EV_PARED, EV_POLVO,
-  EV_HERIDO, EV_ZAP, EV_JEFE_MUERTO, EV_JEFE, EV_GANADO, EV_PERDIDO, EV_VACIO
+  EV_HERIDO, EV_ZAP, EV_JEFE_MUERTO, EV_JEFE, EV_GANADO, EV_PERDIDO, EV_VACIO, EV_FASE2
 };
 
 int zonaDe(int x) { return x >= 166 ? 3 : x >= 111 ? 2 : x >= 56 ? 1 : 0; }
@@ -268,9 +268,26 @@ void matar(int i, bool pisado) {
   e.activo = false;
 }
 
+// El jefe tiene dos fases. e.fase: 0 = fase 1, 1 = cambiando (con escudo), 2 = fase 2
+const int JEFE_VIDA_FASE2 = 10;   // con esta vida pasa a la fase 2
+const int JEFE_CAMBIO = 30;       // ticks que dura el cambio de fase (1,5 s)
+const Nota S_FASE2[] = { {1200, 80}, {600, 80}, {1200, 80}, {600, 80}, {90, 320}, {0, 0} };   // alarma
+
 void danar(int i) {
   Enemigo& e = en[i];
+  int cx = e.x * 16 + 8 * e.w, cy = (e.y - e.h + 1) * 16 + 8 * e.h;
+  if (e.tipo == JEFE && e.fase == 1) {   // escudo: el disparo rebota
+    evento(EV_PARED, cx, cy);
+    return;
+  }
   e.vida--; e.flash = 3;
+  if (e.tipo == JEFE && e.fase == 0 && e.vida <= JEFE_VIDA_FASE2) {
+    e.fase = 1; e.hcd = JEFE_CAMBIO;
+    memset(ebalas, 0, sizeof(ebalas));   // borra sus paquetes
+    avisar(AV_FASE2); sfx(S_FASE2, true);
+    evento(EV_FASE2, cx, cy);
+    return;
+  }
   if (e.vida > 0) {
     evento(EV_GOLPE, e.x * 16 + 8 * e.w, (e.y - e.h + 1) * 16 + 8 * e.h);
     sfx(S_GOLPE, false);
@@ -360,19 +377,27 @@ void moverEnemigos() {
         if (dx && abs(P.x - e.x) <= 9 && !solido(e.x + dx, e.y)) e.x += dx;
       }
     } else {   // JEFE: va y viene, y tira paquetes altos y bajos alternados
+      if (e.fase == 1) {                 // cambiando de fase: quieto y con escudo
+        if (--e.hcd <= 0) { e.fase = 2; e.cd = 4; e.tiro = 12; }
+        continue;
+      }
+      bool f2 = e.fase == 2;             // fase 2: más rápido y tira de a dos paquetes
       if (--e.cd <= 0) {
-        e.cd = 9;
+        e.cd = f2 ? 6 : 9;
         int nx = e.x + e.dir;
         if (nx < 199 || nx > 208) e.dir = -e.dir; else e.x = nx;
       }
       if (--e.tiro <= 0) {
-        e.tiro = 34;
+        e.tiro = f2 ? 24 : 34;
         int dir = (P.x > e.x) - (P.x < e.x); if (!dir) dir = -1;
         int y = e.alto ? 11 : 12;
-        for (int k = 0; k < MAX_EBALAS; k++) if (!ebalas[k].activa) {
-          ebalas[k] = { true, ++idBala, (int16_t)(dir < 0 ? e.x - 1 : e.x + 2), (int16_t)y, (int8_t)dir, 0, 2, y == 11 };
-          break;
-        }
+        int cuantas = f2 ? 2 : 1;
+        for (int n = 0; n < cuantas; n++)
+          for (int k = 0; k < MAX_EBALAS; k++) if (!ebalas[k].activa) {
+            // el segundo paquete sale 3 casillas detrás del primero
+            ebalas[k] = { true, ++idBala, (int16_t)(dir < 0 ? e.x - 1 : e.x + 2), (int16_t)y, (int8_t)dir, 0, (int8_t)(2 + n * 6), y == 11 };
+            break;
+          }
         e.alto = !e.alto;
         sfx(S_TIRO, false);
       }

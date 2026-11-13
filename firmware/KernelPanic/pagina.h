@@ -172,7 +172,8 @@ const AVISOS = [null,
   { txt:"NÚCLEO-0 · ESQUIVÁ LOS PAQUETES", col:"#ff4f6e" },
   { txt:"CHECKPOINT · MEMORIA GUARDADA", col:"#5bd98f" },
   { txt:"NÚCLEO-0 APAGADO · LLEGÁ A LA CPU", col:"#5bd98f" },
-  { txt:"CORTOCIRCUITO · VOLVÉS AL CHECKPOINT", col:"#ff4f6e" }];
+  { txt:"CORTOCIRCUITO · VOLVÉS AL CHECKPOINT", col:"#ff4f6e" },
+  { txt:"NÚCLEO-0 · MODO PÁNICO", col:"#ff4f6e" }];
 const TIPOS = ["bug", "virus", "jefe"];
 
 // ================= ESTADO (lo que manda el ESP8266) =================
@@ -243,6 +244,8 @@ function efecto([tipo, x, y, v]){
     case 11: explosion(x, y, "#5bd98f", 60); break;                                    // ganó
     case 12: explosion(x, y, "#62e3f2", 40); G.shake = 500; break;                     // perdió
     case 13: G.glitch = 300; break;                                                     // cayó al vacío
+    case 14: G.escudoT = 1500; G.shake = 600; G.glitch = 500; G.flash = 200;           // el jefe pasa a la fase 2
+      explosion(x, y, "#ff4f6e", 30); flotante(x, y - 30, "¡FASE 2!", "#ff8ea0"); break;
   }
 }
 async function sondear(){
@@ -478,6 +481,8 @@ function dibujarJugador(now){
   luz(f > 0 ? bx+10 : bx+6, by-y0-17, 12, "rgba(255,209,102,A)", .3);
   luz(bx+8, by-y0-6, 10, "rgba(255,160,70,A)", .2);
 }
+// El jefe pasa a la fase 2 cuando le queda la mitad de la vida (10 de 20)
+const jefeFase2 = () => !!(G.jefe && !G.jefe.muerto && G.jefe.vida <= 10);
 function dibujarEnemigo(e, now){
   const bx = Math.round(e.rx*16 - camPx), by = Math.round(e.ry*16 + 16), fl = e.flash > 0;
   if(e.t === "bug"){            // fragmento de código corrupto: un bloque que se arrastra y "glitchea"
@@ -502,18 +507,33 @@ function dibujarEnemigo(e, now){
     R(cx-1, cy+3, 2, 2, "#1b2030");
     luz(cx+ox, cy, 14, "rgba(255,93,93,A)", .3);
   } else if(e.t === "jefe"){    // NÚCLEO-0: núcleos hexagonales que orbitan alrededor de un ojo
-    const x = bx, y = by - 32, cx = x + 16, cy = y + 16, t = now/700;
+    // Fase 1 naranja y tranquilo; fase 2 (vida 10 o menos) rojo, más rápido, temblando y con grietas
+    const f2 = jefeFase2(), esc = G.escudoT > 0;
+    const C = f2 ? { a:"#ff4f6e", b:"#a3203a", fondo:"#2a0a10", ojo:"#ff4f6e", ojo2:"#ffc2cc", luz:"rgba(255,79,110,A)" }
+                 : { a:"#ffb347", b:"#c77a1e", fondo:"#2c1f0c", ojo:"#ffb347", ojo2:"#ffd27a", luz:"rgba(255,179,71,A)" };
+    const tb = f2 && !reduce && !esc ? Math.round(rnd(-1, 1)) : 0;
+    const x = bx + tb, y = by - 32, cx = x + 16, cy = y + 16, t = now/(f2 ? 300 : 700), rad = f2 ? 14 + (Math.floor(now/120)%2) : 13;
     for(let k=0;k<6;k++){
-      const a = t + k*Math.PI/3, hx = Math.round(cx + Math.cos(a)*13), hy = Math.round(cy + Math.sin(a)*13);
-      const c = fl ? "#ffffff" : (k%2 ? "#ffb347" : "#c77a1e");
+      const a = (k%2 && f2 ? -t : t) + k*Math.PI/3, hx = Math.round(cx + Math.cos(a)*rad), hy = Math.round(cy + Math.sin(a)*rad);
+      const c = fl ? "#ffffff" : (k%2 ? C.a : C.b);
       R(hx-2, hy-4, 5, 1, c); R(hx-3, hy-3, 7, 6, c); R(hx-2, hy+3, 5, 1, c); R(hx-1, hy-1, 3, 2, "#2a1a08");
     }
     R(cx-7, cy-7, 14, 14, "#1a1208"); R(cx-8, cy-5, 16, 10, "#1a1208"); R(cx-5, cy-8, 10, 16, "#1a1208");
-    R(cx-6, cy-6, 12, 12, fl ? "#ffffff" : "#2c1f0c");
-    const ox = clamp(Math.sign(P.x - e.x)*2, -2, 2), pul = (Math.floor(now/200)%2);
-    R(cx-4+ox, cy-4, 8, 8, "#ffb347"); R(cx-3+ox, cy-3, 6, 6, pul ? "#ffd27a" : "#ffb347");
+    R(cx-6, cy-6, 12, 12, fl ? "#ffffff" : C.fondo);
+    const ox = clamp(Math.sign(P.x - e.x)*2, -2, 2), pul = (Math.floor(now/(f2 ? 90 : 200))%2);
+    R(cx-4+ox, cy-4, 8, 8, C.ojo); R(cx-3+ox, cy-3, 6, 6, pul ? C.ojo2 : C.ojo);
     R(cx-1+ox, cy-2, 2, 4, "#1a0e02"); R(cx-3+ox, cy-3, 1, 1, "#fff3d6");
-    luz(cx, cy, 44, "rgba(255,179,71,A)", .4);
+    if(f2){   // grietas en el núcleo
+      R(cx-6, cy-2, 2, 1, "#1a0e02"); R(cx-5, cy-1, 1, 2, "#1a0e02"); R(cx+4, cy+3, 2, 1, "#1a0e02"); R(cx+5, cy+1, 1, 2, "#1a0e02");
+      R(cx-2, cy+5, 1, 2, "#1a0e02"); R(cx+1, cy-7, 1, 2, "#1a0e02");
+    }
+    if(esc){  // escudo mientras cambia de fase
+      const n = 28, rr = 24 + (Math.floor(now/80)%2);
+      for(let k=0;k<n;k++){ if((k + Math.floor(now/60)) % 4 === 0) continue;
+        const a = k*2*Math.PI/n; R(Math.round(cx + Math.cos(a)*rr), Math.round(cy + Math.sin(a)*rr), 2, 2, k%2 ? "#62e3f2" : "#e8fdff"); }
+      luz(cx, cy, 60, "rgba(98,227,242,A)", .35);
+    }
+    luz(cx, cy, f2 ? 54 : 44, C.luz, f2 ? .55 : .4);
   }
 }
 function dibujarBalas(now){
@@ -571,7 +591,7 @@ function dibujar(now){
     for(let i=0;i<3;i++) corazon(6 + i*9, 6, P.vidas > i);
     R(36, 5, 6, 8, "#f4b740"); R(37, 6, 4, 6, "#c98a1c"); R(39, 7, 1, 4, "#ffe7a3");
     const av = Math.min(1, P.x / FLAG_X); R(LW - 66, 8, 60, 3, "#1b2f34"); R(LW - 66, 8, Math.round(60*av), 3, "#62e3f2"); R(LW - 66 + Math.round(60*av) - 1, 6, 2, 7, "#e8fdff");
-    if(G.jefe && !G.jefe.muerto){ R(100, 20, 120, 4, "#2a0d14"); R(100, 20, Math.round(120 * G.jefe.vida / 20), 4, "#ffb347"); }
+    if(G.jefe && !G.jefe.muerto){ R(100, 20, 120, 4, "#2a0d14"); R(100, 20, Math.round(120 * G.jefe.vida / 20), 4, jefeFase2() ? "#ff4f6e" : "#ffb347"); R(160, 19, 1, 6, "#dde7e4"); }
   }
   // viñeta
   const v = L.createRadialGradient(LW/2, LH/2, LH*0.35, LW/2, LH/2, LH*0.85); v.addColorStop(0, "rgba(0,0,0,0)"); v.addColorStop(1, "rgba(0,0,0,.5)");
@@ -592,7 +612,7 @@ function dibujar(now){
   for(const f of G.floats){ ctx.globalAlpha = Math.max(0, Math.min(1, f.life*1.5)); texto(f.txt, (f.y)*2, 10, f.col, (f.x - camPx)*2); }
   ctx.globalAlpha = 1;
   if(enJuego){ texto(String(G.bits), 18, 12, "#f4b740", 92, "left"); texto(String(G.puntos).padStart(5, "0"), 18, 12, "#dde7e4", 640 - 150, "right"); }
-  if(enJuego && G.jefe && !G.jefe.muerto) texto("NÚCLEO-0", 30, 9, "#ffd27a", 196, "left");
+  if(enJuego && G.jefe && !G.jefe.muerto) texto(jefeFase2() ? "NÚCLEO-0 · FASE 2" : "NÚCLEO-0", 30, 9, jefeFase2() ? "#ff8ea0" : "#ffd27a", 196, "left");
   if(G.st === "JUGANDO" && G.banner > 0){
     ctx.globalAlpha = Math.min(1, G.banner/12); const Zn = ZONAS[G.zonaVista];
     panelTexto(70, 76); texto(`ZONA ${G.zonaVista+1}/4`, 90, 11, "#cf8545"); texto(Zn.nombre, 112, 20, "#dde7e4"); texto(Zn.texto, 133, 10, "#9fb4b6"); ctx.globalAlpha = 1;
@@ -737,7 +757,7 @@ function frame(now){
   G.parts = G.parts.filter(q => q.life > 0);
   for(const f of G.floats){ f.y -= dt*.015; f.life -= dt/900; }
   G.floats = G.floats.filter(f => f.life > 0);
-  if(G.shake > 0) G.shake -= dt; if(G.glitch > 0) G.glitch -= dt; if(G.flash > 0) G.flash -= dt;
+  if(G.shake > 0) G.shake -= dt; if(G.glitch > 0) G.glitch -= dt; if(G.flash > 0) G.flash -= dt; if(G.escudoT > 0) G.escudoT -= dt;
   dibujar(now);
   if(!conectado){ texto("SIN CONEXIÓN CON EL ESP8266", 466, 10, "#ff8a9a"); }
   panelAcc += dt; if(panelAcc >= 100){ panelAcc = 0; panel(); }
@@ -756,7 +776,7 @@ function panel(){
     set("h-zona", `${z+1} · ${ZONAS[z].corto}`);
     set("h-vidas", "■".repeat(Math.max(0,P.vidas)) + "□".repeat(3 - Math.max(0,P.vidas)));
     set("h-bits", G.bits); set("h-pts", G.puntos);
-    if(G.jefe){ set("h-avl", "NÚCLEO-0"); set("h-av", G.jefe.vida * 5 + "%"); }
+    if(G.jefe){ set("h-avl", jefeFase2() ? "NÚCLEO-0 · FASE 2" : "NÚCLEO-0"); set("h-av", G.jefe.vida * 5 + "%"); }
     else { set("h-avl", "AVANCE"); set("h-av", Math.min(100, Math.round(P.x / FLAG_X * 100)) + "%"); }
   }
   set("estado", conectado ? (HW.uno ? "Conectado · recibiendo el joystick del Arduino UNO" : "Conectado al ESP8266 · el Arduino UNO no envía datos") : "Sin conexión con el ESP8266");

@@ -134,8 +134,12 @@ La posición exacta de cada componente en el protoboard está en `docs/guia_arma
 - **Puntos:** bit +10 · código corrupto +20 · dron +30 · NÚCLEO-0 +500 · llegar a la CPU +50 por cada vida que quede.
 - **Peligros:** código corrupto que se arrastra (se elimina agachado o saltándole encima), drones de vigilancia que persiguen, arcos eléctricos y ventiladores que se encienden y apagan, y pozos.
 - **Vidas:** 3. Los parches verdes devuelven una. Al perder todas, la partida termina; con SW se sigue desde el último checkpoint.
-- **Final:** NÚCLEO-0 tira paquetes altos (hay que agacharse) y bajos (hay que saltar). Al eliminarlo se abre la puerta de la CPU.
-- **LEDs:** Q0–Q2 vidas, Q3–Q7 avance en el nivel. **Buzzer:** salto, disparo, bit, daño, jefe, victoria y derrota.
+- **Final:** NÚCLEO-0 tiene 20 de vida y dos fases. Tira paquetes altos (hay que agacharse) y bajos (hay que saltar).
+  - **Fase 1** (20 a 11): se mueve despacio y tira un paquete por vez.
+  - **Cambio de fase** (al llegar a 10): se queda quieto 1,5 s con un escudo que absorbe los disparos, borra sus paquetes y suena una alarma.
+  - **Fase 2** (10 a 0): se pone rojo y se mueve más rápido. Dispara más seguido y de a dos paquetes a la misma altura.
+  - Al eliminarlo se abre la puerta de la CPU.
+- **LEDs:** Q0–Q2 vidas, Q3–Q7 avance en el nivel. **Buzzer:** salto, disparo, bit, daño, jefe, cambio de fase, victoria y derrota.
 
 Para probarlo sin hardware, abrí `prototipo_web/index.html` en el navegador. Se juega con las flechas o WASD, se dispara con K, X o J, y SW es Espacio o Enter. Al costado se ve lo que vería el ESP8266: los valores del joystick, el byte enviado al 74HC595, el buzzer y el JSON de `/estado`.
 

@@ -517,7 +517,12 @@ void tickJuego() {
       else if (!sonidoActual && notaRestante <= 0) sfx(S_TEMA, false);   // música del menú
       break;
     case JUGANDO:
+#if DISPARO_CON_SW
+      // Modo de un solo botón: durante la partida, apretar la palanca (SW) dispara. No hay pausa.
+      if (HW.swEstable == 0) HW.boton = 0;
+#else
       if (HW.swFlanco) { G.st = PAUSA; sfx(S_PAUSA, true); break; }
+#endif
       jugar();
       break;
     case PAUSA:

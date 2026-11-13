@@ -76,6 +76,12 @@ const int ZONA_MUERTA = 150;   // alrededor del centro, se ignora el movimiento
 const uint16_t TICK_MS = 50;   // el juego avanza un paso cada 50 ms (20 veces por segundo)
 #define SONIDO 1               // 0 = buzzer apagado
 
+// Disparo con el pulsador del joystick.
+//   0 = el botón aparte (pin 3 del UNO) dispara y SW pausa la partida.
+//   1 = durante la partida, apretar la palanca (SW) también dispara (no hay pausa).
+//       Sirve si el botón aparte falla. El botón aparte sigue funcionando igual.
+#define DISPARO_CON_SW 1
+
 // Permite jugar desde la página con el teclado, para probar sin el joystick conectado.
 // Para la entrega, poné 0: así el juego solo se controla con el hardware.
 #define MODO_TECLADO_WEB 1

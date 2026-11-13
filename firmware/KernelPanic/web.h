@@ -141,6 +141,8 @@ void manejarEstado() {
   agregar("sw", HW.swEstable);
   agregar("bt", HW.boton);
   agregar("uno", HW.unoOk ? 1 : 0);
+  agregar("ok", HW.unoPaquetes);
+  agregar("err", HW.unoErrores);
   agregar("leds", HW.leds);
   json += "\"buz\":"; json += HW.buzzer;
   json += "}}";

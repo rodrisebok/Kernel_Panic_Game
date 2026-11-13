@@ -66,7 +66,7 @@ const char* AP_CLAVE = "kernelpanic";      // mínimo 8 caracteres
 const uint32_t WIFI_ESPERA_MS = 10000;
 
 // Comunicación con el UNO
-const uint32_t UNO_BAUDIOS     = 38400;
+const uint32_t UNO_BAUDIOS     = 19200;   // tiene que ser igual a la del JoystickUNO.ino
 const uint16_t UNO_TIMEOUT_MS  = 300;   // sin datos durante este tiempo = joystick desconectado
 
 // Joystick

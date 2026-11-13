@@ -74,14 +74,14 @@ Kernel_Panic_Game/
 
 ```
  Joystick + botón ──► Arduino UNO ──UART──► ESP8266 ──Wi-Fi──► Página web
-   (en la mano)       (lee los ejes) 38400   (lógica del juego,   (dibuja el
+   (en la mano)       (lee los ejes) 19200   (lógica del juego,   (dibuja el
                                     baudios   servidor web)        juego)
                                                │
                                                ├──► 74HC595 ──► 8 LEDs
                                                └──► Buzzer
 ```
 
-El UNO manda 50 veces por segundo una línea de texto: `X,Y,SW,BOTON` (por ejemplo `519,507,1,1`).
+El UNO manda 50 veces por segundo, a 19200 baudios, una línea de texto: `X,Y,SW,BOTON,CONTROL` (por ejemplo `519,507,1,1,10`). `CONTROL` es un número de verificación (checksum) = (X + 3·Y + 7·SW + 11·BOTON) mod 256: el ESP hace la misma cuenta y descarta la línea si no coincide.
 
 ---
 
@@ -143,7 +143,7 @@ Para probarlo sin hardware, abrí `prototipo_web/index.html` en el navegador. Se
 
 ## Cómo cargarlo
 
-1. **Arduino UNO:** abrir `arduino_uno/JoystickUNO/JoystickUNO.ino`, placa *Arduino Uno*, cargar. En el Monitor Serie (38400 baudios) aparecen las lecturas.
+1. **Arduino UNO:** abrir `arduino_uno/JoystickUNO/JoystickUNO.ino`, placa *Arduino Uno*, cargar. En el Monitor Serie (19200 baudios) aparecen las lecturas.
 2. **ESP8266:** instalar el núcleo *esp8266* en el Gestor de placas y elegir *NodeMCU 1.0 (ESP-12E Module)*. Probar cada parte con los sketches de `pruebas/` en este orden: LEDs, buzzer, UART.
 3. **El juego:** abrir `firmware/KernelPanic/KernelPanic.ino` (el IDE abre también las pestañas `.h`).
    - En `config.h`, poner el nombre y la clave del Wi-Fi en `WIFI_RED` y `WIFI_CLAVE`.
@@ -158,7 +158,7 @@ Para probarlo sin hardware, abrí `prototipo_web/index.html` en el navegador. Se
 ## Explicaciones para la defensa
 
 ### 1. ¿Cómo se leen los ejes del joystick?
-El joystick tiene dos potenciómetros: VRx (izquierda-derecha) y VRy (arriba-abajo). Cada uno entrega un voltaje entre 0 y 5 V. El ESP8266 tiene una sola entrada analógica, así que el **Arduino UNO** los convierte con `analogRead()` a números de 0 a 1023 y envía la línea `X,Y,SW,BOTON` cada 20 ms por UART. El ESP la recibe con `SoftwareSerial` en D2, la arma carácter por carácter sin bloquear y descarta las líneas incompletas.
+El joystick tiene dos potenciómetros: VRx (izquierda-derecha) y VRy (arriba-abajo). Cada uno entrega un voltaje entre 0 y 5 V. El ESP8266 tiene una sola entrada analógica, así que el **Arduino UNO** los convierte con `analogRead()` a números de 0 a 1023 y envía la línea `X,Y,SW,BOTON,CONTROL` cada 20 ms por UART a 19200 baudios. El ESP la recibe con `SoftwareSerial` en D2, la arma carácter por carácter sin bloquear y la valida: si está incompleta, tiene valores fuera de rango o el número de verificación no coincide, la descarta. La página muestra cuántas líneas llegaron bien y cuántas se descartaron.
 
 ### 2. ¿Cómo se determinan las direcciones?
 Se calcula cuánto se alejó cada eje del centro (Δx = X − 512, Δy = Y − 512). Si los dos desvíos son menores que la **zona muerta** (±150), la dirección es CENTRO: así se evitan movimientos por el ruido o porque la palanca no vuelve exactamente al medio. Si no, gana el eje con mayor desvío y el signo indica el sentido: izquierda/derecha o arriba/abajo.
@@ -193,6 +193,7 @@ La página pide `/estado` con `fetch()` cada 100 ms y dibuja lo que recibe en un
 | El Arduino IDE no mostraba el puerto del NodeMCU | El cable USB era solo de carga; con otro cable apareció el chip CP2102 sin driver y se instaló el driver CP210x de Silicon Labs |
 | Los ejes del joystick quedaban fijos en 1023 | Falso contacto en el GND del joystick; se ajustaron los cables |
 | El botón de disparo daba siempre 0 o no cambiaba | Estaba girado (patas unidas por dentro) y en el pin equivocado; se giró 90° y se pasó al pin 3 |
+| Con el juego andando, los botones respondían a veces sí y a veces no | `SoftwareSerial` del ESP8266 leía mal algunos caracteres mientras atendía el Wi-Fi. Se bajó la velocidad a 19200 baudios y se agregó un número de verificación a cada línea para descartar las que llegan con errores |
 | Los 5 LEDs amarillos no encendían | Estaban colocados al revés; se dieron vuelta (la pata larga va hacia la salida del 595) |
 | Wokwi no simula el ESP8266 | La simulación usa un ESP32, que además puede leer el joystick directamente |
 | Los LEDs de 5 mm no entran en columnas seguidas | Se ubican en columnas alternadas (29, 31, … 43) |

@@ -1,14 +1,14 @@
 /*
   Prueba 4 · Recepción del joystick desde el Arduino UNO (ESP8266)
   Antes: cargá JoystickUNO.ino en el UNO.
-  Esta prueba muestra lo que llega por D2 (X,Y,SW,BOTON) y la dirección calculada.
+  Esta prueba muestra lo que llega por D2 (X,Y,SW,BOTON,CONTROL) y la dirección calculada.
 
   Conexiones:
     TX del UNO (pin 1) → 1 kΩ → D2 del ESP8266
                                  └→ 1 kΩ → 1 kΩ → GND   (divisor: 5 V → 3,3 V)
     GND del UNO → GND del ESP8266   (¡obligatorio!)
 
-  Si no llega nada: revisá el GND común y que los dos usen 38400 baudios.
+  Si no llega nada: revisá el GND común y que los dos usen 19200 baudios.
 */
 #include <SoftwareSerial.h>
 
@@ -19,7 +19,7 @@ const int ZONA_MUERTA = 150;
 
 void setup() {
   Serial.begin(115200);
-  uno.begin(38400);
+  uno.begin(19200);
   Serial.println("\nEsperando datos del UNO...");
 }
 

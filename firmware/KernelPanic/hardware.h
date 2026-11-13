@@ -87,19 +87,36 @@ SoftwareSerial unoSerial(PIN_UNO_RX, -1);   // solo recibe
 char unoBuf[24];
 uint8_t unoLen = 0;
 
-// Procesa una línea completa "X,Y,SW,BOTON". Si algo no cierra, se descarta.
+// Procesa una línea completa "X,Y,SW,BOTON,CONTROL". Si algo no cierra, se descarta.
+// CONTROL es un número de verificación (checksum) que calcula el UNO con los otros cuatro:
+// si un carácter llegó mal, la cuenta no coincide y la línea se ignora.
+long checksumUno(long x, long y, long sw, long boton) { return (x + 3 * y + 7 * sw + 11 * boton) % 256; }
+
+bool leerNumero(char*& p, long& v, bool ultimo) {
+  char* fin;
+  v = strtol(p, &fin, 10);
+  if (fin == p) return false;
+  if (ultimo) { if (*fin != 0) return false; }
+  else if (*fin != ',') return false;
+  p = fin + 1;
+  return true;
+}
+
 void procesarLineaUno() {
   unoBuf[unoLen] = 0;
+  int comas = 0;
+  for (uint8_t i = 0; i < unoLen; i++) if (unoBuf[i] == ',') comas++;
   char* p = unoBuf;
-  char* fin;
-  long x = strtol(p, &fin, 10);  if (fin == p || *fin != ',') { HW.unoErrores++; return; }
-  p = fin + 1;
-  long y = strtol(p, &fin, 10);  if (fin == p || *fin != ',') { HW.unoErrores++; return; }
-  p = fin + 1;
-  long sw = strtol(p, &fin, 10); if (fin == p) { HW.unoErrores++; return; }
-  long boton = 1;                                   // 4.º campo: botón de disparo
-  if (*fin == ',') { p = fin + 1; boton = strtol(p, &fin, 10); if (fin == p) { HW.unoErrores++; return; } }
-  if (x < 0 || x > 1023 || y < 0 || y > 1023 || (sw != 0 && sw != 1) || (boton != 0 && boton != 1)) { HW.unoErrores++; return; }
+  long x, y, sw, boton = 1, control;
+  bool ok;
+  if (comas == 4)        // formato nuevo, con verificación
+    ok = leerNumero(p, x, false) && leerNumero(p, y, false) && leerNumero(p, sw, false) &&
+         leerNumero(p, boton, false) && leerNumero(p, control, true) && control == checksumUno(x, y, sw, boton);
+  else if (comas == 3)   // formato viejo, sin verificación
+    ok = leerNumero(p, x, false) && leerNumero(p, y, false) && leerNumero(p, sw, false) && leerNumero(p, boton, true);
+  else ok = false;
+  if (ok) ok = x >= 0 && x <= 1023 && y >= 0 && y <= 1023 && (sw == 0 || sw == 1) && (boton == 0 || boton == 1);
+  if (!ok) { HW.unoErrores++; return; }
   nuevaLecturaJoystick(x, y, sw, boton);
 }
 

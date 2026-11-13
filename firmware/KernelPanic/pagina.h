@@ -134,7 +134,7 @@ pre#json{margin:0;font-size:11px;line-height:1.45;max-height:220px;overflow:auto
       </div>
       <div class="hw">
         <div class="hd"><b>Pulsador y disparo</b><span class="pin">UNO pin 2 y pin 3</span></div>
-        <dl class="kv"><dt>SW</dt><dd id="swv">1 (suelto)</dd><dt>Disparo</dt><dd id="btv">1 (suelto)</dd></dl>
+        <dl class="kv"><dt>SW</dt><dd id="swv">1 (suelto)</dd><dt>Disparo</dt><dd id="btv">1 (suelto)</dd><dt>Líneas UART</dt><dd id="uart">—</dd></dl>
       </div>
       <div class="hw">
         <div class="hd"><b>Registro 74HC595</b><span class="pin">D7 · D8 · D0</span></div>
@@ -250,7 +250,7 @@ function aplicar(s){
   G.jefe = s.jv >= 0 ? { vida:s.jv } : null;
   for(const ev of s.ev) efecto(ev);
   ultimoEv = s.evs;
-  Object.assign(HW, { x:s.hw.x, y:s.hw.y, dir:s.hw.dir, sw:s.hw.sw, bt:s.hw.bt, uno:s.hw.uno, leds:s.hw.leds, buz:s.hw.buz });
+  Object.assign(HW, { x:s.hw.x, y:s.hw.y, dir:s.hw.dir, sw:s.hw.sw, bt:s.hw.bt, uno:s.hw.uno, leds:s.hw.leds, buz:s.hw.buz, ok:s.hw.ok, err:s.hw.err });
   HW.izq = HW.x < 512 - DEAD; HW.der = HW.x > 512 + DEAD;
 }
 // Los eventos del ESP se convierten en efectos visuales
@@ -697,6 +697,7 @@ function panel(){
   $("jdot").style.left = (HW.x/1023*100) + "%"; $("jdot").style.top = (HW.y/1023*100) + "%";
   set("jx", HW.x); set("jy", HW.y); set("jd", HW.dir);
   set("swv", HW.sw ? "1 (suelto)" : "0 (presionado)"); set("btv", HW.bt ? "1 (suelto)" : "0 (presionado)");
+  if(HW.ok !== undefined) set("uart", `${HW.ok} buenas · ${HW.err} descartadas`);
   ledDots.forEach((l,i) => l.classList.toggle("on", !!(HW.leds & (1<<i))));
   set("bbin", "0b" + HW.leds.toString(2).padStart(8,"0")); set("bhex", "0x" + HW.leds.toString(16).toUpperCase().padStart(2,"0"));
   $("spk").classList.toggle("on", HW.buz > 0); set("bz", HW.buz ? `${HW.buz} Hz` : "silencio");

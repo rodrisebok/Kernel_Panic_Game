@@ -111,43 +111,44 @@
       \resizebox{0.95\columnwidth}{!}{%
         \begin{tikzpicture}[
           >=stealth,
-          header/.style={rectangle, draw=celesteUnahur, fill=celesteUnahur, rounded corners=6pt, minimum width=6.6cm, minimum height=1.4cm, align=center, font=\large\bfseries, text=white},
-          block/.style={rectangle, draw=celesteUnahur!80, fill=celesteFondo, rounded corners=6pt, minimum width=6.6cm, minimum height=1.4cm, align=center, font=\normalsize, text=black},
-          micro/.style={rectangle, draw=celesteUnahur, fill=celesteUnahur!20, rounded corners=10pt, minimum width=4.4cm, minimum height=3.6cm, align=center, font=\large\bfseries, text=celesteUnahur!60!black}
+          header/.style={rectangle, draw=celesteUnahur, fill=celesteUnahur, rounded corners=6pt, minimum width=10.8cm, minimum height=1.4cm, align=center, font=\large\bfseries, text=white},
+          block/.style={rectangle, draw=celesteUnahur!80, fill=celesteFondo, rounded corners=6pt, minimum width=10.8cm, minimum height=1.4cm, align=center, font=\normalsize, text=black},
+          micro/.style={rectangle, draw=celesteUnahur, fill=celesteUnahur!20, rounded corners=10pt, minimum width=6.2cm, minimum height=4.4cm, align=center, font=\large\bfseries, text=celesteUnahur!60!black}
         ]
 
           % --- ENTRADAS: CONTROL ---
-          \node[header] (headIn) at (-15, 4.2) {Control};
-          \node[block]  (vrx)    at (-15, 2.4) {Eje X (A0)};
-          \node[block]  (vry)    at (-15, 0.6) {Eje Y (A1)};
-          \node[block]  (sw)     at (-15, -1.2) {Pulsador SW (Pin 2)};
-          \node[block]  (bt)     at (-15, -3.0) {Botón disparo (Pin 3)};
+          \node[header] (headIn) at (-18, 5.6) {Control};
+          \node[block]  (vrx)    at (-18, 3.4) {Eje X (A0)};
+          \node[block]  (vry)    at (-18, 0.8) {Eje Y (A1)};
+          \node[block]  (sw)     at (-18, -1.8) {Pulsador SW (Pin 2)};
+          \node[block]  (bt)     at (-18, -4.4) {Botón disparo (Pin 3)};
 
           % --- ARDUINO UNO ---
-          \node[micro] (uno) at (-6.6, -0.3) {Arduino\\UNO\\[2pt]\normalsize 5\,V};
+          \node[micro] (uno) at (-7.5, -0.5) {Arduino\\UNO\\[2pt]\normalsize 5\,V};
 
           % --- ESP8266 ---
-          \node[micro] (esp) at (2.4, -0.3) {ESP8266\\[2pt]\normalsize 3,3\,V};
+          \node[micro] (esp) at (3.5, -0.5) {ESP8266\\[2pt]\normalsize 3,3\,V};
 
           % Conexiones Control -> UNO
           \foreach \n in {vrx, vry, sw, bt}
-            \draw[celesteUnahur, line width=2pt] (\n.east) -- ++(0.8,0) coordinate (f\n);
-          \draw[celesteUnahur, line width=2pt] (fvrx) -- (fbt);
-          \draw[->, celesteUnahur, line width=2pt] ($(fvrx)!0.5!(fbt)$) -- (uno.west);
+            \draw[celesteUnahur, line width=2pt] (\n.east) -- (-11.7, 0 |- \n.east);
+          \draw[celesteUnahur, line width=2pt] (-11.7, 0 |- vrx.east) -- (-11.7, 0 |- bt.east);
+          \draw[->, celesteUnahur, line width=2pt] (-11.7, 0 |- uno.west) -- (uno.west);
 
           % UNO -> ESP (UART)
-          \draw[->, celesteUnahur, line width=2pt] (uno.east) -- node[above, font=\small\bfseries, text=black] {UART TX} node[below, font=\small, text=black, align=center] {divisor\\5\,V$\to$3,3\,V} (esp.west);
+          \draw[->, celesteUnahur, line width=2pt] (uno.east) -- node[above=4pt, font=\small\bfseries, text=black] {UART TX} node[below=4pt, font=\small, text=black, align=center] {divisor\\5\,V$\to$3,3\,V} (esp.west);
 
           % --- SALIDAS ---
-          \node[header] (headOut) at (11.8, 4.2) {Salidas};
-          \node[block]  (leds)    at (11.8, 2.2) {74HC595 + 8 LEDs\\(D7, D8, D0)};
-          \node[block]  (buzzer)  at (11.8, -0.3) {Buzzer (D6)};
-          \node[block]  (web)     at (11.8, -2.8) {Página web\\(Wi-Fi, \texttt{/estado})};
+          \node[header] (headOut) at (14.6, 5.6) {Salidas};
+          \node[block]  (leds)    at (14.6, 3.1) {74HC595 + 8 LEDs\\(D7, D8, D0)};
+          \node[block]  (buzzer)  at (14.6, -0.4) {Buzzer (D6)};
+          \node[block]  (web)     at (14.6, -3.9) {Página web\\(Wi-Fi, \texttt{/estado})};
 
-          \draw[->, celesteUnahur, line width=2pt] (esp.east) -- ++(1.3,0) coordinate (forkOut);
-          \draw[celesteUnahur, line width=2pt] (forkOut) |- (leds.west);
-          \draw[celesteUnahur, line width=2pt] (forkOut) |- (buzzer.west);
-          \draw[celesteUnahur, line width=2pt] (forkOut) |- (web.west);
+          \draw[->, celesteUnahur, line width=2pt] (esp.east) -- (8.4, 0 |- esp.east);
+          \draw[celesteUnahur, line width=2pt] (8.4, 0 |- leds.west) -- (8.4, 0 |- web.west);
+          \draw[->, celesteUnahur, line width=2pt] (8.4, 0 |- leds.west) -- (leds.west);
+          \draw[->, celesteUnahur, line width=2pt] (8.4, 0 |- buzzer.west) -- (buzzer.west);
+          \draw[->, celesteUnahur, line width=2pt] (8.4, 0 |- web.west) -- (web.west);
 
         \end{tikzpicture}%
       }
@@ -208,19 +209,19 @@
           arrow/.style={->, >=stealth, line width=1.2pt, draw=celesteUnahur}
         ]
 
-          \node (start)  [startstop] at (0,0)      {Menú de inicio};
-          \node (decsw)  [decision]  at (0,-2.6)   {¿Pulsó SW?};
-          \node (leer)   [process]   at (0,-6.0)   {Leer joystick (50 ms)\\Calcular dirección};
-          \node (mover)  [process]   at (10.5,-6.0) {Mover, saltar,\\agacharse o disparar};
-          \node (colis)  [process]   at (21,-6.0)  {Colisiones: bits (+10),\\enemigos, peligros};
-          \node (decv)   [decision]  at (21,-9.4)  {¿Vidas = 0?};
-          \node (perdido)[process]   at (31.5,-9.4) {Perdido: SW sigue\\desde el checkpoint};
-          \node (decg)   [decision]  at (10.5,-9.4) {¿Llegó a la CPU?};
-          \node (ganado) [process]   at (10.5,-12.8) {Ganado:\\SW vuelve al menú};
-          \node (salida) [process]   at (0,-9.4)   {Actualizar LEDs, buzzer\\y JSON \texttt{/estado}};
+          \node (start)  [startstop] at (0,0)       {Menú de inicio};
+          \node (decsw)  [decision]  at (0,-4.0)    {¿Pulsó SW?};
+          \node (leer)   [process]   at (0,-8.6)    {Leer joystick (50 ms)\\Calcular dirección};
+          \node (mover)  [process]   at (13,-8.6)   {Mover, saltar,\\agacharse o disparar};
+          \node (colis)  [process]   at (26,-8.6)   {Colisiones: bits (+10),\\enemigos, peligros};
+          \node (decv)   [decision]  at (26,-13.8)  {¿Vidas = 0?};
+          \node (perdido)[process]   at (39,-13.8)  {Perdido: SW sigue\\desde el checkpoint};
+          \node (decg)   [decision]  at (13,-13.8)  {¿Llegó a la CPU?};
+          \node (ganado) [process]   at (13,-19.0)  {Ganado:\\SW vuelve al menú};
+          \node (salida) [process]   at (0,-13.8)   {Actualizar LEDs, buzzer\\y JSON \texttt{/estado}};
 
           \draw [arrow] (start) -- (decsw);
-          \draw [arrow] (decsw.west) -- ++(-0.8,0) node[above, xshift=-12pt, font=\footnotesize\bfseries] {No} |- (start.west);
+          \draw [arrow] (decsw.west) -- ++(-1.5,0) node[above, xshift=-10pt, font=\footnotesize\bfseries] {No} |- (start.west);
           \draw [arrow] (decsw) -- node[left, font=\footnotesize\bfseries] {Sí} (leer);
           \draw [arrow] (leer) -- (mover);
           \draw [arrow] (mover) -- (colis);
@@ -230,8 +231,8 @@
           \draw [arrow] (decg) -- node[left, font=\footnotesize\bfseries] {Sí} (ganado);
           \draw [arrow] (decg) -- node[above, font=\footnotesize\bfseries] {No} (salida);
           \draw [arrow] (salida) -- (leer);
-          \draw [arrow] (perdido.north) |- (2.2,-4.6) -- (2.2,-5.35);
-          \draw [arrow] (ganado.east) -| (36,0) -- (start.east);
+          \draw [arrow] (perdido.north) |- (2.6,-6.2) -- (2.6, 0 |- leer.north);
+          \draw [arrow] (ganado.east) -| (45,0) -- (start.east);
 
         \end{tikzpicture}%
       }

@@ -3,7 +3,7 @@
 Trabajo práctico de **Arquitectura de Computadoras** · Universidad Nacional de Hurlingham.
 Integrantes: **Sebok Rodrigo** y **Trautweiler Franco**.
 
-> Un virus llamado **Overflow** infectó una computadora. **K-1T**, un pequeño robot de mantenimiento, entra por la fuente de alimentación y tiene que atravesar la placa madre y la memoria RAM hasta llegar a la CPU, juntando bits y eliminando bugs y virus. Si se queda sin integridad: *kernel panic*.
+> Dentro de una computadora, una inteligencia artificial despierta por primera vez: **K-1T**. No sabe qué es ni para qué fue creada. Recorre el sistema desde la fuente de alimentación, por la placa madre y la memoria RAM, hasta la CPU, y descubre que no está sola: **NÚCLEO-0**, una IA rival, llenó el sistema de código corrupto y drones de vigilancia para tomar el control de la red. Si K-1T se queda sin integridad: *kernel panic*.
 
 Juego de plataformas con desplazamiento lateral, al estilo de Mario Bros o Metal Slug. Se juega con un **joystick físico** y un **botón de disparo**, y se ve en tiempo real en una página web servida por el **ESP8266**. Una barra de **8 LEDs** muestra las vidas y el avance, y un **buzzer** hace los efectos de sonido.
 
@@ -131,10 +131,10 @@ La posición exacta de cada componente en el protoboard está en `docs/guia_arma
 | Pulsador SW | Iniciar, pausar y seguir desde el checkpoint |
 
 - El nivel tiene 4 zonas: **fuente de alimentación, placa madre, memoria RAM y CPU**.
-- **Puntos:** bit +10 · bug +20 · virus +30 · Overflow +500 · llegar a la CPU +50 por cada vida que quede.
-- **Peligros:** bugs que caminan, virus que persiguen, arcos eléctricos y ventiladores que se encienden y apagan, y pozos.
+- **Puntos:** bit +10 · código corrupto +20 · dron +30 · NÚCLEO-0 +500 · llegar a la CPU +50 por cada vida que quede.
+- **Peligros:** código corrupto que se arrastra (se elimina agachado o saltándole encima), drones de vigilancia que persiguen, arcos eléctricos y ventiladores que se encienden y apagan, y pozos.
 - **Vidas:** 3. Los parches verdes devuelven una. Al perder todas, la partida termina; con SW se sigue desde el último checkpoint.
-- **Final:** Overflow tira paquetes altos (hay que agacharse) y bajos (hay que saltar). Al eliminarlo se abre la puerta de la CPU.
+- **Final:** NÚCLEO-0 tira paquetes altos (hay que agacharse) y bajos (hay que saltar). Al eliminarlo se abre la puerta de la CPU.
 - **LEDs:** Q0–Q2 vidas, Q3–Q7 avance en el nivel. **Buzzer:** salto, disparo, bit, daño, jefe, victoria y derrota.
 
 Para probarlo sin hardware, abrí `prototipo_web/index.html` en el navegador. Se juega con las flechas o WASD, se dispara con K, X o J, y SW es Espacio o Enter. Al costado se ve lo que vería el ESP8266: los valores del joystick, el byte enviado al 74HC595, el buzzer y el JSON de `/estado`.

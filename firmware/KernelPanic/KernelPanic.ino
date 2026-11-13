@@ -3,8 +3,8 @@
   Arquitectura de Computadoras · Universidad Nacional de Hurlingham
   Integrantes: Sebok Rodrigo, Trautweiler Franco
 
-  K-1T, un robot de mantenimiento, recorre una computadora infectada (fuente de alimentación,
-  placa madre, memoria RAM y CPU) hasta eliminar al virus Overflow.
+  K-1T, una inteligencia artificial que acaba de despertar, recorre una computadora (fuente de alimentación,
+  placa madre, memoria RAM y CPU) hasta apagar a NÚCLEO-0, una IA rival que quiere tomar el control de la red.
 
   Hardware:
     - Arduino UNO: lee el joystick y el botón de disparo y los manda por UART (JoystickUNO.ino)

@@ -18,7 +18,7 @@ Juego de plataformas con desplazamiento lateral, al estilo de Mario Bros o Metal
 | Programas de prueba por componente | ✅ `pruebas/` |
 | Guía de armado del protoboard | ✅ `docs/guia_armado.html` |
 | Póster (Overleaf) | ✅ `poster/poster.tex` |
-| Firmware del ESP8266 con el juego de plataformas | 🔧 en desarrollo |
+| Firmware del ESP8266 con el juego de plataformas | ✅ `firmware/KernelPanic` (falta la prueba final en el hardware) |
 | Simulación en Cirkit Designer (Arduino UNO + ESP32-S3) | ✅ `cirkit/` |
 | Simulación del circuito en Wokwi (ESP32, con protoboard) | ✅ `wokwi/` (programa de prueba de componentes) |
 | El juego completo dentro de la simulación | 🔧 en desarrollo |
@@ -29,6 +29,14 @@ Juego de plataformas con desplazamiento lateral, al estilo de Mario Bros o Metal
 
 ```
 Kernel_Panic_Game/
+├── firmware/KernelPanic/        Firmware del juego para el NodeMCU ESP8266
+│   ├── KernelPanic.ino          setup() y loop()
+│   ├── config.h                 Wi-Fi, pines y orientación del joystick
+│   ├── hardware.h               Lectura del UNO, 74HC595 y buzzer
+│   ├── juego.h                  La lógica del juego (nivel, jugador, enemigos, jefe)
+│   ├── web.h                    Wi-Fi y servidor web (/, /mapa, /estado)
+│   └── pagina.h                 La página del juego guardada en la memoria flash
+├── firmware/pagina/pagina.html  Fuente editable de la página (se copia dentro de pagina.h)
 ├── prototipo_web/index.html     El juego completo en el navegador (simula el hardware)
 ├── arduino_uno/JoystickUNO/     Programa del Arduino UNO: lee el joystick y lo envía por UART
 ├── pruebas/                     Un sketch de prueba por componente (para el ESP8266)
@@ -137,7 +145,13 @@ Para probarlo sin hardware, abrí `prototipo_web/index.html` en el navegador. Se
 
 1. **Arduino UNO:** abrir `arduino_uno/JoystickUNO/JoystickUNO.ino`, placa *Arduino Uno*, cargar. En el Monitor Serie (38400 baudios) aparecen las lecturas.
 2. **ESP8266:** instalar el núcleo *esp8266* en el Gestor de placas y elegir *NodeMCU 1.0 (ESP-12E Module)*. Probar cada parte con los sketches de `pruebas/` en este orden: LEDs, buzzer, UART.
-3. Si al cargar el ESP8266 falla con todo conectado, desconectar el cable de D8 mientras se carga.
+3. **El juego:** abrir `firmware/KernelPanic/KernelPanic.ino` (el IDE abre también las pestañas `.h`).
+   - En `config.h`, poner el nombre y la clave del Wi-Fi en `WIFI_RED` y `WIFI_CLAVE`.
+   - Cargarlo en el NodeMCU (en nuestra PC, COM3) y abrir el Monitor Serie a 115200: muestra la dirección para abrir en el navegador, por ejemplo `http://192.168.0.25`.
+   - Si no logra conectarse a esa red en 10 segundos, el ESP crea la suya: **KernelPanic-ESP** (clave `kernelpanic`). Con el celular conectado a esa red, el juego se abre en `http://192.168.4.1`.
+   - No hace falta instalar bibliotecas: todo viene con el soporte de placas ESP8266.
+4. Si al cargar el ESP8266 falla con todo conectado, desconectar el cable de D8 mientras se carga.
+5. **Orientación del joystick:** en nuestro control el módulo quedó girado 90°, así que `config.h` intercambia los ejes (`INTERCAMBIAR_EJES 1`) e invierte el vertical (`INVERTIR_Y 1`). Si en otro armado las direcciones quedan mal, se corrigen cambiando esos valores.
 
 ---
 

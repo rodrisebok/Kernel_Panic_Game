@@ -153,33 +153,6 @@ pre#json{margin:0;font-size:11px;line-height:1.45;max-height:220px;overflow:auto
     </aside>
   </div>
 
-  <section class="info">
-    <div>
-      <h3>La historia</h3>
-      <p>Año 2049. Dentro de una computadora, una inteligencia artificial despierta por primera vez: es K-1T. No sabe qué es ni para qué fue creada, y empieza a recorrer el sistema por dentro, desde la fuente de alimentación hasta la CPU.</p>
-      <p>En el camino descubre que no está sola: NÚCLEO-0, otra IA, llenó el sistema de código corrupto y drones de vigilancia para tomar el control de toda la red. Si K-1T la apaga, el sistema queda libre.</p>
-    </div>
-    <div>
-      <h3>Qué hay en el nivel</h3>
-      <div class="legend">
-        <span class="sw" style="background:var(--cyan)"></span><span>K-1T, la IA que controlás</span>
-        <span class="sw" style="background:#ff3d9a"></span><span>Código corrupto: se arrastra; disparale agachado o saltale encima</span>
-        <span class="sw" style="background:#9aa4b8"></span><span>Dron de vigilancia: vuela y te sigue; disparale</span>
-        <span class="sw" style="background:var(--amber)"></span><span>Bit: suma 10 puntos</span>
-        <span class="sw" style="background:var(--ok)"></span><span>Parche: +1 integridad · poste verde: checkpoint</span>
-        <span class="sw" style="background:#a8d8ff"></span><span>Arco eléctrico y ventilador: dañan cuando están encendidos</span>
-      </div>
-    </div>
-    <div>
-      <h3>Cómo funciona</h3>
-      <ul>
-        <li>El Arduino UNO lee el joystick y se lo manda al ESP8266 por UART, a través de un divisor de tensión.</li>
-        <li>El ESP8266 corre toda la lógica del juego, un paso cada 50 ms con <code>millis()</code>.</li>
-        <li>Esta página pide <code>/estado</code> cada 100 ms y solo dibuja lo que el ESP le contesta.</li>
-        <li>Los LEDs muestran la integridad y el avance; el buzzer, los efectos de sonido.</li>
-      </ul>
-    </div>
-  </section>
 </div>
 
 <script>
@@ -626,7 +599,9 @@ function dibujar(now){
   }
   if(G.aviso && G.st === "JUGANDO"){ ctx.globalAlpha = Math.min(1, G.aviso.t/8); panelTexto(424, 34); texto(G.aviso.txt, 441, 13, G.aviso.col); ctx.globalAlpha = 1; }
 
-  if(G.st === "MENU"){
+  if(G.st === "MENU" && introActiva(now)){
+    dibujarIntro(now);
+  } else if(G.st === "MENU"){
     // K-1T corriendo en el menú
     const pr = P.rx, py = P.ry; P.rx = (camPx + 150)/16; P.ry = 11; P.mira = 1; const izq = HW.der; HW.der = true;
     dibujarJugador(now); HW.der = izq; P.rx = pr; P.ry = py;
@@ -651,6 +626,98 @@ function dibujar(now){
     texto(`BITS ${G.bits}   ·   PUNTOS ${G.puntos}   ·   RÉCORD ${G.record}`, 248, 13, "#f4b740");
     if(G.bloqueo <= 0 && Math.floor(now/450)%2) texto("PULSÁ SW PARA VOLVER AL MENÚ", 318, 13, "#dde7e4");
   }
+}
+
+// ================= INTRO: la historia en texto que se aleja (al abrir la página y cada tanto en el menú) =================
+const INTRO_TITULO = ["REGISTRO 00", "EL DESPERTAR"];
+const INTRO_TEXTO = [
+  "Año 2049.",
+  "",
+  "Dentro de una computadora",
+  "conectada a toda la red de la",
+  "ciudad, una inteligencia",
+  "artificial despierta por",
+  "primera vez.",
+  "",
+  "Se llama K-1T. No sabe qué es",
+  "ni para qué fue creada.",
+  "",
+  "Pero no está sola. NÚCLEO-0,",
+  "otra IA, llenó el sistema de",
+  "código corrupto y drones de",
+  "vigilancia. Quiere tomar el",
+  "control de toda la red.",
+  "",
+  "Para detenerla, K-1T deberá",
+  "cruzar la fuente de",
+  "alimentación, la placa madre",
+  "y la memoria RAM, hasta",
+  "llegar a la CPU...",
+  "",
+  "...donde NÚCLEO-0 la espera."
+];
+const INTRO_LOGO = 4500, INTRO_VEL = 48, INTRO_RETRASO = 45000, INTRO_PERSP = 160;   // ms del logo, px/s del texto, espera en el menú
+const crawl = document.createElement("canvas");
+const crawlLinea = 40, crawlAncho = 560;
+crawl.width = crawlAncho; crawl.height = 140 + INTRO_TEXTO.length * crawlLinea + 40;
+let crawlListo = false;
+function prepararCrawl(){
+  const c = crawl.getContext("2d");
+  c.clearRect(0, 0, crawl.width, crawl.height);
+  c.textAlign = "center"; c.textBaseline = "top"; c.fillStyle = "#ffd27a";
+  c.font = "26px Silkscreen, monospace"; c.fillText(INTRO_TITULO[0], crawlAncho/2, 0);
+  c.font = "40px Silkscreen, monospace"; c.fillText(INTRO_TITULO[1], crawlAncho/2, 40);
+  c.font = "24px Silkscreen, monospace";
+  INTRO_TEXTO.forEach((l, i) => c.fillText(l, crawlAncho/2, 140 + i*crawlLinea));
+  crawlListo = true;
+}
+document.fonts && document.fonts.ready.then(prepararCrawl);
+setTimeout(prepararCrawl, 1500);   // si la fuente no carga (sin Internet), con la del sistema
+const INTRO_DUR = INTRO_LOGO + (crawl.height + 60 + INTRO_PERSP * (1/.15 - 1)) / INTRO_VEL * 1000;   // hasta que la última línea queda lejos
+let introInicio = performance.now(), menuDesde = null, estadoAnterior = null;
+function introActiva(now){
+  if(G.st !== "MENU"){ introInicio = null; menuDesde = null; estadoAnterior = G.st; return false; }
+  if(estadoAnterior && estadoAnterior !== "MENU"){ menuDesde = now; estadoAnterior = "MENU"; }
+  if(introInicio === null && menuDesde !== null && now - menuDesde > INTRO_RETRASO) introInicio = now;   // modo demostración
+  if(introInicio !== null && now - introInicio > INTRO_DUR){ introInicio = null; menuDesde = now; }
+  return introInicio !== null;
+}
+function dibujarIntro(now){
+  if(!crawlListo) prepararCrawl();
+  const t = now - introInicio;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle = "#03050a"; ctx.fillRect(0, 0, 640, 480);
+  // estrellas: píxeles de datos que titilan
+  for(let k=0;k<90;k++){
+    const x = hash(k,5)*640, y = hash(k,9)*480, a = .25 + .6*Math.abs(Math.sin(now/700 + k));
+    ctx.fillStyle = k % 7 ? `rgba(160,200,255,${a})` : `rgba(255,210,122,${a})`;
+    ctx.fillRect(Math.round(x), Math.round(y), k % 5 ? 1 : 2, k % 5 ? 1 : 2);
+  }
+  if(t < INTRO_LOGO){   // el logo se aleja hacia el centro
+    const p = t / INTRO_LOGO, s = 1.6 * Math.pow(1 - p, 1.6) + .05;
+    ctx.save(); ctx.globalAlpha = Math.min(1, (1 - p) * 3);
+    ctx.translate(320, 230); ctx.scale(s, s);
+    ctx.font = "64px Silkscreen, monospace"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillStyle = "#dde7e4"; ctx.fillText("KERNEL", 0, -38);
+    ctx.fillStyle = "#ff4f6e"; ctx.fillText("PANIC", 0, 38);
+    ctx.restore(); ctx.globalAlpha = 1;
+  } else {               // el texto sube y se aleja en perspectiva
+    const desp = (t - INTRO_LOGO) / 1000 * INTRO_VEL;   // cuánto subió el texto
+    const arriba = 70, abajo = 480, alto = abajo - arriba;
+    for(let ys = arriba; ys < abajo; ys++){
+      const f = (ys - arriba) / alto;                    // 0 = horizonte, 1 = borde de abajo
+      if(f < .02) continue;
+      const lejos = INTRO_PERSP * (1/f - 1);              // distancia sobre el "piso" del texto
+      const srcY = Math.round(desp - lejos - 60);
+      if(srcY < 0 || srcY >= crawl.height) continue;
+      const w = crawlAncho * (0.15 + 0.95 * f);
+      ctx.globalAlpha = Math.min(1, f * 3.2);
+      ctx.drawImage(crawl, 0, srcY, crawlAncho, 1, 320 - w/2, ys, w, 1);
+    }
+    ctx.globalAlpha = 1;
+  }
+  ctx.fillStyle = "rgba(0,0,0,.12)"; for(let y=0;y<480;y+=3) ctx.fillRect(0,y,640,1);
+  if(Math.floor(now/600) % 2) texto("PULSÁ SW PARA EMPEZAR", 462, 11, "#62e3f2");
 }
 
 // ================= BUCLE DE DIBUJO =================

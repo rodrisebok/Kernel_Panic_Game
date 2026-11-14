@@ -24,7 +24,7 @@ El proyecto se desarrolló por etapas:
 | Programas de prueba por componente | ✅ `pruebas/` |
 | Guía de armado del protoboard | ✅ `docs/guia_armado.html` |
 | Póster (Overleaf) | ✅ `poster/poster.tex` |
-| Firmware del ESP8266 con el juego de plataformas | ✅ `firmware/KernelPanic` (probado en el hardware, ver `docs/bitacora.md`) |
+| Firmware del ESP8266 con el juego de plataformas | ✅ `firmware/KernelPanic` (probado en el hardware, ver `docs/pruebas.md`) |
 | Simulación en Cirkit Designer (Arduino UNO + ESP32-S3) | ✅ `cirkit/` · [proyecto](https://app.cirkitdesigner.com/project/a3656b23-a601-4fc2-a228-c781c96eade9) · imagen en `docs/circuito_cirkit.png` |
 
 ---
@@ -51,7 +51,7 @@ Kernel_Panic_Game/
 │   ├── Prueba5_UART_UNO/        Recepción de los datos del UNO
 │   └── Prueba6_Juego_completo/  Juego completo con los programas finales
 ├── docs/guia_armado.html        Guía paso a paso del circuito (abrir en el navegador)
-├── docs/bitacora.md             Registro de las pruebas del circuito real, paso a paso
+├── docs/pruebas.md              Pruebas del circuito antes de armar el juego completo
 ├── cirkit/                      Simulación en Cirkit Designer: código del ESP32-S3 (el UNO usa arduino_uno/JoystickUNO)
 └── poster/                      Póster en LaTeX para Overleaf
 ```
@@ -115,7 +115,7 @@ El UNO manda 50 veces por segundo, a 19200 baudios, una línea de texto: `X,Y,SW
 
 <img src="docs/medicion_divisor.jpg" alt="Medición del divisor de tensión con el tester" width="600">
 
-*Medición con el tester a la salida del divisor, es decir, en la señal que llega a D2 del ESP8266: **2,99 V**. El TX del UNO trabaja a 5 V y el divisor lo baja a 2/3; el resultado queda por debajo de los 3,6 V que soporta como máximo el ESP8266. En la Prueba 4 de la bitácora se midieron 4,40 V a la entrada y 2,93 V a la salida.*
+*Medición con el tester a la salida del divisor, es decir, en la señal que llega a D2 del ESP8266: **2,99 V**. El TX del UNO trabaja a 5 V y el divisor lo baja a 2/3; el resultado queda por debajo de los 3,6 V que soporta como máximo el ESP8266. En la Prueba 4 (`docs/pruebas.md`) se midieron 4,40 V a la entrada y 2,93 V a la salida.*
 
 **Alimentación:** cada placa con su propio cable USB. El 5 V del UNO no se conecta al NodeMCU.
 

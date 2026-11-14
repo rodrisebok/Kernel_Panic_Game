@@ -1,7 +1,7 @@
-# Bitácora de pruebas · Kernel Panic
+# Pruebas del circuito · Kernel Panic
 
-Registro del montaje y de las pruebas del circuito real, en el orden en que se hicieron.
-Cada prueba usa un sketch de la carpeta `pruebas/` (o del Arduino UNO) y prueba una sola parte del sistema.
+Tests que hicimos en el circuito real **antes de hacer funcionar el juego completo**, en el orden en que se hicieron.
+Cada prueba revisa una sola parte del sistema, así un error se encuentra enseguida. Los programas de cada una están en la carpeta `pruebas/`.
 
 | # | Prueba | Sketch | Estado |
 |---|---|---|---|

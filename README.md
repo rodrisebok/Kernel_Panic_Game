@@ -3,9 +3,15 @@
 Trabajo práctico de **Arquitectura de Computadoras** · Universidad Nacional de Hurlingham.
 Integrantes: **Sebok Rodrigo** y **Trautweiler Franco**.
 
-> Dentro de una computadora, una inteligencia artificial despierta por primera vez: **K-1T**. No sabe qué es ni para qué fue creada. Recorre el sistema desde la fuente de alimentación, por la placa madre y la memoria RAM, hasta la CPU, y descubre que no está sola: **NÚCLEO-0**, una IA rival, llenó el sistema de código corrupto y drones de vigilancia para tomar el control de la red. Si K-1T se queda sin integridad: *kernel panic*.
-
 Juego de plataformas con desplazamiento lateral, al estilo de Mario Bros o Metal Slug. Se juega con un **joystick físico** y un **botón de disparo**, y se ve en tiempo real en una página web servida por el **ESP8266**. Una barra de **8 LEDs** muestra las vidas y el avance, y un **buzzer** hace los efectos de sonido.
+
+El ESP8266 es el centro del sistema: recibe el control, ejecuta la lógica del juego y maneja todas las salidas. Como tiene una sola entrada analógica y el joystick necesita dos, un **Arduino UNO** lee el joystick y los botones y le manda los datos por **UART**. La señal pasa por un **divisor de tensión** que la baja de 5 V a 3,3 V.
+
+El proyecto se desarrolló por etapas:
+1. Un prototipo jugable en el navegador, para definir el juego.
+2. Una prueba por cada componente en el protoboard: LEDs, buzzer, control, divisor y UART.
+3. El juego completo funcionando en el hardware.
+
 
 ---
 

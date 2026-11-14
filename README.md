@@ -172,34 +172,6 @@ Para probarlo sin hardware, abrí `prototipo_web/index.html` en el navegador. Se
 
 ---
 
-## Explicaciones para la defensa
-
-### 1. ¿Cómo se leen los ejes del joystick?
-El joystick tiene dos potenciómetros: VRx (izquierda-derecha) y VRy (arriba-abajo). Cada uno entrega un voltaje entre 0 y 5 V. El ESP8266 tiene una sola entrada analógica, así que el **Arduino UNO** los convierte con `analogRead()` a números de 0 a 1023 y envía la línea `X,Y,SW,BOTON,CONTROL` cada 20 ms por UART a 19200 baudios. El ESP la recibe con `SoftwareSerial` en D2, la arma carácter por carácter sin bloquear y la valida: si está incompleta, tiene valores fuera de rango o el número de verificación no coincide, la descarta. La página muestra cuántas líneas llegaron bien y cuántas se descartaron.
-
-### 2. ¿Cómo se determinan las direcciones?
-Se calcula cuánto se alejó cada eje del centro (Δx = X − 512, Δy = Y − 512). Si los dos desvíos son menores que la **zona muerta** (±150), la dirección es CENTRO: así se evitan movimientos por el ruido o porque la palanca no vuelve exactamente al medio. Si no, gana el eje con mayor desvío y el signo indica el sentido: izquierda/derecha o arriba/abajo.
-
-### 3. ¿Cómo se detecta la pulsación?
-El pulsador SW y el botón de disparo usan `INPUT_PULLUP` en el UNO: sueltos valen 1 y presionados 0. El ESP detecta el **flanco**, es decir el momento en que el valor pasa de 1 a 0, para que una pulsación cuente una sola vez aunque se mantenga apretado. Además, un cambio solo se acepta si se repite en dos lecturas seguidas (antirrebote).
-
-### 4. ¿Cómo se controla el movimiento del jugador?
-El nivel es una grilla de 224 × 15 casillas guardada como texto. Izquierda y derecha mueven a K-1T una casilla si no hay una pared. Arriba inicia un salto: sube 3 casillas, flota un instante y cae acelerando. Abajo lo agacha (pasa a ocupar 1 casilla en lugar de 2). Las plataformas finas se atraviesan desde abajo, y las móviles lo llevan encima.
-
-### 5. ¿Cómo funciona la lógica del videojuego?
-Todo avanza en **pasos de 50 ms** medidos con `millis()`. No se usa `delay()`, porque congelaría la lectura del joystick y el servidor web. En cada paso se leen las entradas, se mueve al jugador, se avanzan las balas, se mueven los enemigos cercanos a la cámara y se revisan las colisiones. Después se actualizan los puntos, los LEDs y el buzzer. El juego es una **máquina de estados**: MENÚ → JUGANDO ⇄ PAUSA → PERDIDO o GANADO.
-
-### 6. ¿Cómo se comunica el ESP8266 con la página web?
-El ESP8266 funciona como **servidor web** con tres rutas:
-- `/` devuelve la página del juego, guardada en la memoria flash (`PROGMEM`) para no ocupar RAM.
-- `/mapa` devuelve el nivel como texto (15 líneas de 224 caracteres); la página lo pide al cargar y cada vez que el nivel cambia (por ejemplo, cuando se abre una puerta).
-- `/estado` devuelve en **JSON** (armado a mano, sin bibliotecas) la posición del jugador, los enemigos, las balas, los puntos, el estado de la partida, el joystick, los LEDs y el buzzer.
-
-### 7. ¿Cómo se actualiza el juego en tiempo real?
-La página pide `/estado` con `fetch()` cada 100 ms y dibuja lo que recibe en un `<canvas>`. La página no calcula el juego, solo lo muestra; para que se vea fluido, interpola las posiciones entre una respuesta y la siguiente.
-
----
-
 ## Problemas encontrados y soluciones
 
 | Problema | Solución |

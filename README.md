@@ -19,7 +19,7 @@ Juego de plataformas con desplazamiento lateral, al estilo de Mario Bros o Metal
 | Guía de armado del protoboard | ✅ `docs/guia_armado.html` |
 | Póster (Overleaf) | ✅ `poster/poster.tex` |
 | Firmware del ESP8266 con el juego de plataformas | ✅ `firmware/KernelPanic` (probado en el hardware, ver `docs/bitacora.md`) |
-| Simulación en Cirkit Designer (Arduino UNO + ESP32-S3) | ✅ `cirkit/` |
+| Simulación en Cirkit Designer (Arduino UNO + ESP32-S3) | ✅ `cirkit/` · [proyecto](https://app.cirkitdesigner.com/project/a3656b23-a601-4fc2-a228-c781c96eade9) · imagen en `docs/circuito_cirkit.png` |
 | Simulación del circuito en Wokwi (ESP32, con protoboard) | ✅ `wokwi/` (programa de prueba de componentes) |
 | El juego completo dentro de la simulación | 🔧 en desarrollo |
 
@@ -86,6 +86,10 @@ El UNO manda 50 veces por segundo, a 19200 baudios, una línea de texto: `X,Y,SW
 ---
 
 ## Conexiones
+
+![Circuito completo en Cirkit Designer](docs/circuito_cirkit.png)
+
+*Circuito completo dibujado en [Cirkit Designer](https://app.cirkitdesigner.com/project/a3656b23-a601-4fc2-a228-c781c96eade9). Cirkit no tiene el ESP8266, así que en el dibujo lo reemplaza un ESP32-S3 con los pines equivalentes: GPIO 16 para recibir del UNO, GPIO 11, 12 y 10 para el 74HC595, y GPIO 6 para el buzzer.*
 
 ### Control → Arduino UNO
 | Joystick / botón | UNO |

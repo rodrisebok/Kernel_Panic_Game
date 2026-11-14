@@ -1,5 +1,5 @@
 /*
-  Prueba 4 · Recepción del joystick desde el Arduino UNO (ESP8266)
+  Prueba 5 · Recepción del joystick desde el Arduino UNO (ESP8266)
   Antes: cargá JoystickUNO.ino en el UNO.
   Esta prueba muestra lo que llega por D2 (X,Y,SW,BOTON,CONTROL) y la dirección calculada.
 

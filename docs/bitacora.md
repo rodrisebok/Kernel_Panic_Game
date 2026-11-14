@@ -8,9 +8,9 @@ Cada prueba usa un sketch de la carpeta `pruebas/` (o del Arduino UNO) y prueba 
 | 1 | NodeMCU + 74HC595 + 8 LEDs | `pruebas/Prueba1_LEDs_595` | ✅ Superada |
 | 2 | Buzzer | `pruebas/Prueba2_Buzzer` | ✅ Superada |
 | 3 | Control: joystick y botón en el Arduino UNO | `pruebas/Prueba3_Control` y `arduino_uno/JoystickUNO` | ✅ Superada |
-| 4 | Divisor de tensión (medición con tester) | — | ✅ Superada |
-| 5 | Comunicación UART UNO → ESP8266 | `pruebas/Prueba4_UART_UNO` | ✅ Superada |
-| 6 | Juego completo con página web | `firmware/KernelPanic` | ✅ Superada |
+| 4 | Divisor de tensión (medición con tester) | `pruebas/Prueba4_Divisor` (sin programa) | ✅ Superada |
+| 5 | Comunicación UART UNO → ESP8266 | `pruebas/Prueba5_UART_UNO` | ✅ Superada |
+| 6 | Juego completo con página web | `firmware/KernelPanic` (ver `pruebas/Prueba6_Juego_completo`) | ✅ Superada |
 
 ---
 

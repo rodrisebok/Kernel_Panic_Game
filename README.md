@@ -47,7 +47,9 @@ Kernel_Panic_Game/
 │   ├── Prueba1_LEDs_595/        74HC595 y los 8 LEDs
 │   ├── Prueba2_Buzzer/          Buzzer
 │   ├── Prueba3_Control/         Joystick y botón en el Arduino UNO (diagnóstico)
-│   └── Prueba4_UART_UNO/        Recepción de los datos del UNO
+│   ├── Prueba4_Divisor/         Medición del divisor con el tester (sin programa)
+│   ├── Prueba5_UART_UNO/        Recepción de los datos del UNO
+│   └── Prueba6_Juego_completo/  Juego completo con los programas finales
 ├── docs/guia_armado.html        Guía paso a paso del circuito (abrir en el navegador)
 ├── docs/bitacora.md             Registro de las pruebas del circuito real, paso a paso
 ├── cirkit/                      Simulación en Cirkit Designer: código del ESP32-S3 (el UNO usa arduino_uno/JoystickUNO)
@@ -159,7 +161,7 @@ Para probarlo sin hardware, abrí `prototipo_web/index.html` en el navegador. Se
 ## Cómo cargarlo
 
 1. **Arduino UNO:** abrir `arduino_uno/JoystickUNO/JoystickUNO.ino`, placa *Arduino Uno*, cargar. En el Monitor Serie (19200 baudios) aparecen las lecturas.
-2. **ESP8266:** instalar el núcleo *esp8266* en el Gestor de placas y elegir *NodeMCU 1.0 (ESP-12E Module)*. Probar cada parte con los sketches de `pruebas/` en este orden: LEDs, buzzer, UART.
+2. **ESP8266:** instalar el núcleo *esp8266* en el Gestor de placas y elegir *NodeMCU 1.0 (ESP-12E Module)*. Probar cada parte con las pruebas de `pruebas/` en orden, de la 1 a la 6.
 3. **El juego:** abrir `firmware/KernelPanic/KernelPanic.ino` (el IDE abre también las pestañas `.h`).
    - En `config.h`, poner el nombre y la clave del Wi-Fi en `WIFI_RED` y `WIFI_CLAVE`.
    - Cargarlo en el NodeMCU (en nuestra PC, COM3) y abrir el Monitor Serie a 115200: muestra la dirección para abrir en el navegador, por ejemplo `http://192.168.0.25`.

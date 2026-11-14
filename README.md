@@ -12,6 +12,10 @@ El proyecto se desarrolló por etapas:
 2. Una prueba por cada componente en el protoboard: LEDs, buzzer, control, divisor y UART.
 3. El juego completo funcionando en el hardware.
 
+<img src="docs/armado_proceso.jpg" alt="Proceso de armado del circuito" width="700">
+
+*Proceso de armado. En el protoboard ya están el NodeMCU, el 74HC595, los 8 LEDs con sus resistencias, el buzzer y el botón de disparo. El joystick y el Arduino UNO todavía están sin conectar.*
+
 
 ---
 
@@ -50,6 +54,7 @@ Kernel_Panic_Game/
 │   ├── Prueba5_UART_UNO/        Recepción de los datos del UNO
 │   └── Prueba6_Juego_completo/  Juego completo con los programas finales
 ├── docs/guia_armado.html        Guía paso a paso del circuito (abrir en el navegador)
+├── docs/armado_proceso.jpg      Foto del proceso de armado del circuito
 ├── docs/medicion_divisor.jpg    Foto de la medición del divisor con el tester
 ├── docs/pruebas.md              Pruebas del circuito antes de armar el juego completo
 ├── cirkit/                      Simulación en Cirkit Designer: código del ESP32-S3 (el UNO usa arduino_uno/JoystickUNO)

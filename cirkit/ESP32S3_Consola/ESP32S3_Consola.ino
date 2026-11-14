@@ -3,7 +3,7 @@
   Arquitectura de Computadoras · UNAHUR
 
   Igual que en el circuito real: el Arduino UNO lee el joystick y el botón y manda
-  "X,Y,SW,BOTON" por UART a 38400 baudios. La señal pasa por un divisor de tensión
+  "X,Y,SW,BOTON,CONTROL" por UART a 19200 baudios (CONTROL sirve para descartar líneas dañadas). La señal pasa por un divisor de tensión
   (5 V → 3,3 V) y entra al ESP32-S3 por el GPIO 16.
   (Cirkit no simula el ESP8266; el ESP32-S3 cumple el mismo papel.)
 
@@ -37,8 +37,10 @@ void escribir595(uint8_t b) {
 
 void procesarLinea() {
   buf[len] = 0;
-  int nx, ny, nsw, nbt;
-  if (sscanf(buf, "%d,%d,%d,%d", &nx, &ny, &nsw, &nbt) == 4 &&
+  int nx, ny, nsw, nbt, nctl;
+  int n = sscanf(buf, "%d,%d,%d,%d,%d", &nx, &ny, &nsw, &nbt, &nctl);
+  bool controlOk = (n == 4) || (n == 5 && nctl == (int)((nx + 3L * ny + 7 * nsw + 11 * nbt) % 256));
+  if ((n == 4 || n == 5) && controlOk &&
       nx >= 0 && nx <= 1023 && ny >= 0 && ny <= 1023 && nsw >= 0 && nsw <= 1 && nbt >= 0 && nbt <= 1) {
     x = nx; y = ny; sw = nsw; boton = nbt;
     ultimoDato = millis(); lineas++;
@@ -47,7 +49,7 @@ void procesarLinea() {
 
 void setup() {
   Serial.begin(115200);
-  Serial1.begin(38400, SERIAL_8N1, PIN_UNO_RX, -1);   // solo recibe
+  Serial1.begin(19200, SERIAL_8N1, PIN_UNO_RX, -1);   // igual que Serial.begin del UNO   // solo recibe
   pinMode(PIN_595_DATOS, OUTPUT);
   pinMode(PIN_595_RELOJ, OUTPUT);
   pinMode(PIN_595_LATCH, OUTPUT);

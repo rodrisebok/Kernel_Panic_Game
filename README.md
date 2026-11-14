@@ -182,6 +182,8 @@ Para probarlo sin hardware, abrí `prototipo_web/index.html` en el navegador. Se
 | `delay()` congela el servidor web | Reloj del juego con `millis()` |
 | Los ejes del joystick quedaban fijos en 1023 | Falso contacto en el GND del joystick; se ajustaron los cables |
 | El botón de disparo daba siempre 0 o no cambiaba | Estaba girado (patas unidas por dentro) y en el pin equivocado; se giró 90° y se pasó al pin 3 |
+| El joystick respondía con las direcciones cambiadas (derecha movía hacia abajo, izquierda hacia arriba) | El módulo quedó girado 90° en el protoboard. Se corrigió por software, sin recablear: `config.h` intercambia los ejes e invierte el vertical (`INTERCAMBIAR_EJES`, `INVERTIR_Y`) |
+| Al cargar el programa aparecía el error "Invalid head of packet" | Se estaba cargando el firmware del ESP8266 en el puerto del UNO. Con las dos placas conectadas a la misma PC, cada una tiene su puerto (en nuestra PC, COM3 el NodeMCU y COM4 el UNO) y hay que elegir el correcto |
 | Con el juego andando, los botones respondían a veces sí y a veces no | `SoftwareSerial` del ESP8266 leía mal algunos caracteres mientras atendía el Wi-Fi. Se bajó la velocidad a 19200 baudios y se agregó un número de verificación a cada línea para descartar las que llegan con errores |
 | Cirkit Designer no tiene el ESP8266 | La simulación usa un ESP32-S3 con pines equivalentes (GPIO 16, 11, 12, 10 y 6) |
 | El jefe no se movía cuando estaba lejos de la cámara | El jefe se actualiza siempre y la cámara se fija durante la pelea |

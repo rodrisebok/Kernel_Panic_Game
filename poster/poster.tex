@@ -105,10 +105,9 @@
       \item \textbf{Servidor web:} el ESP8266 aloja la página del juego y responde cada 100\,ms al pedido \texttt{GET /estado} con un JSON que contiene la posición del jugador, los enemigos, el puntaje y el estado de la partida.
     \end{itemize}
 
-    \vspace{1ex}
     \begin{figure}
       \centering
-      \resizebox{0.95\columnwidth}{!}{%
+      \resizebox{0.9\columnwidth}{!}{%
         \begin{tikzpicture}[
           >=stealth,
           header/.style={rectangle, draw=celesteUnahur, fill=celesteUnahur, rounded corners=6pt, minimum width=10.8cm, minimum height=1.4cm, align=center, font=\large\bfseries, text=white},
@@ -117,11 +116,11 @@
         ]
 
           % --- ENTRADAS: CONTROL ---
-          \node[header] (headIn) at (-18, 5.6) {Control};
-          \node[block]  (vrx)    at (-18, 3.4) {Eje X (A0)};
+          \node[header] (headIn) at (-18, 5.2) {Control};
+          \node[block]  (vrx)    at (-18, 3.1) {Eje X (A0)};
           \node[block]  (vry)    at (-18, 0.8) {Eje Y (A1)};
-          \node[block]  (sw)     at (-18, -1.8) {Pulsador SW (Pin 2)};
-          \node[block]  (bt)     at (-18, -4.4) {Botón disparo (Pin 3)};
+          \node[block]  (sw)     at (-18, -1.5) {Pulsador SW (Pin 2)};
+          \node[block]  (bt)     at (-18, -3.8) {Botón disparo (Pin 3)};
 
           % --- ARDUINO UNO ---
           \node[micro] (uno) at (-7.5, -0.5) {Arduino\\UNO\\[2pt]\normalsize 5\,V};
@@ -139,10 +138,10 @@
           \draw[->, celesteUnahur, line width=2pt] (uno.east) -- node[above=4pt, font=\small\bfseries, text=black] {UART TX} node[below=4pt, font=\small, text=black, align=center] {divisor\\5\,V$\to$3,3\,V} (esp.west);
 
           % --- SALIDAS ---
-          \node[header] (headOut) at (14.6, 5.6) {Salidas};
-          \node[block]  (leds)    at (14.6, 3.1) {74HC595 + 8 LEDs\\(D7, D8, D0)};
+          \node[header] (headOut) at (14.6, 5.2) {Salidas};
+          \node[block]  (leds)    at (14.6, 2.8) {74HC595 + 8 LEDs\\(D7, D8, D0)};
           \node[block]  (buzzer)  at (14.6, -0.4) {Buzzer (D6)};
-          \node[block]  (web)     at (14.6, -3.9) {Página web\\(Wi-Fi, \texttt{/estado})};
+          \node[block]  (web)     at (14.6, -3.6) {Página web\\(Wi-Fi, \texttt{/estado})};
 
           \draw[->, celesteUnahur, line width=2pt] (esp.east) -- (8.4, 0 |- esp.east);
           \draw[celesteUnahur, line width=2pt] (8.4, 0 |- leds.west) -- (8.4, 0 |- web.west);
@@ -191,7 +190,7 @@
 
     \begin{figure}
         \centering
-        \includegraphics[width=0.46\columnwidth]{logos/juego.png}
+        \includegraphics[width=0.36\columnwidth]{logos/juego.png}
         \caption{Interfaz web del juego: NÚCLEO-0 en la fase 2, en la CPU.}
         \label{fig:web}
     \end{figure}
@@ -297,8 +296,8 @@
 
   \begin{figure}
       \centering
-      \includegraphics[width=0.6\columnwidth,height=0.11\textheight,keepaspectratio]{logos/protoboard.jpg}
-      \caption{Montaje del circuito en protoboard.}
+      \includegraphics[width=\columnwidth,height=0.10\textheight,keepaspectratio]{logos/circuito.png}
+      \caption{Circuito completo en Cirkit Designer (ESP32-S3 en lugar del ESP8266).}
       \label{fig:proto}
   \end{figure}
 

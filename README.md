@@ -25,8 +25,8 @@ El proyecto se desarrolló por etapas:
 |---|---|
 | Diseño del juego (prototipo jugable en el navegador) | ✅ `prototipo_web/index.html` |
 | Programa del Arduino UNO (lectura del joystick) | ✅ `arduino_uno/JoystickUNO` |
-| Programas de prueba por componente | ✅ `pruebas/` |
 | Guía de armado del protoboard | ✅ `docs/guia_armado.html` |
+| Programas de prueba por componente | ✅ `pruebas/` |
 | Póster (Overleaf) | ✅ `poster/poster.tex` |
 | Firmware del ESP8266 con el juego de plataformas | ✅ `firmware/KernelPanic` (probado en el hardware, ver `docs/pruebas.md`) |
 | Simulación en Cirkit Designer (Arduino UNO + ESP32-S3) | ✅ `cirkit/` · [proyecto](https://app.cirkitdesigner.com/project/a3656b23-a601-4fc2-a228-c781c96eade9) |

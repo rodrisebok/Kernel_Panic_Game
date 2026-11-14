@@ -111,6 +111,10 @@ El UNO manda 50 veces por segundo, a 19200 baudios, una línea de texto: `X,Y,SW
 | Punto de unión | 1 kΩ → 1 kΩ → GND (divisor: 5 V × 2/3 ≈ 3,3 V) |
 | GND del UNO | GND del ESP8266 |
 
+<img src="docs/medicion_divisor.jpg" alt="Medición del divisor de tensión con el tester" width="600">
+
+*Medición con el tester a la salida del divisor, es decir, en la señal que llega a D2 del ESP8266: **2,99 V**. El TX del UNO trabaja a 5 V y el divisor lo baja a 2/3; el resultado queda por debajo de los 3,6 V que soporta como máximo el ESP8266. En la Prueba 4 de la bitácora se midieron 4,40 V a la entrada y 2,93 V a la salida.*
+
 **Alimentación:** cada placa con su propio cable USB. El 5 V del UNO no se conecta al NodeMCU.
 
 ### ESP8266 → salidas

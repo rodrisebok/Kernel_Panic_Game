@@ -67,7 +67,7 @@
       \item \textbf{Interpretar} los ejes X e Y del joystick para obtener cuatro direcciones, respetando una zona muerta central, y detectar la pulsación.
       \item \textbf{Ejecutar} la lógica del juego en el ESP8266 y mostrarla en tiempo real en una página web servida por Wi-Fi.
       \item \textbf{Integrar} componentes adicionales con función en el juego: una barra de 8 LEDs (vidas y avance) y un buzzer (efectos de sonido).
-      \item \textbf{Validar} el circuito y el programa en Wokwi antes del montaje físico.
+      \item \textbf{Validar} el circuito en Cirkit Designer y en el protoboard.
     \end{itemize}
   \end{alertblock}
 
@@ -172,12 +172,12 @@
     \begin{itemize}
       \item \textbf{Entorno:} Arduino IDE, con funciones \texttt{setup()} y \texttt{loop()}. El juego avanza en ciclos de 50\,ms medidos con \texttt{millis()}, sin \texttt{delay()}, para que la lectura del joystick, los sonidos y la web no se bloqueen entre sí.
       \item \textbf{Circuito:} joystick y botón de disparo conectados al Arduino UNO; LEDs con resistencias de $220\,\Omega$ manejados por un 74HC595; buzzer en una salida digital; divisor de tensión con tres resistencias de $1\,\text{k}\Omega$. Cada placa se alimenta por su propio USB y solo comparten la señal TX y GND.
-      \item \textbf{Validación:} simulación en Wokwi y seis pruebas en el protoboard, una por componente. El divisor medido dio 4,40\,V $\to$ 2,93\,V, como indica el cálculo.
+      \item \textbf{Validación:} simulación en Cirkit Designer y seis pruebas en el protoboard. El divisor medido dio 4,40\,V $\to$ 2,93\,V, como indica el cálculo.
     \end{itemize}
 
     \heading{Herramientas Utilizadas}
     \begin{itemize}
-      \item \textbf{Simulación:} Wokwi y Cirkit Designer (con ESP32 en vez de ESP8266).
+      \item \textbf{Simulación:} Cirkit Designer (con ESP32-S3 en vez de ESP8266).
       \item \textbf{Microcontroladores:} NodeMCU ESP8266 y Arduino UNO.
       \item \textbf{Hardware:} Joystick KY-023, pulsador, 74HC595, 8 LEDs, buzzer, resistencias, protoboard y cables.
       \item \textbf{Software:} Arduino IDE (sin bibliotecas externas) y GitHub.
@@ -291,7 +291,7 @@
       \item \textbf{Integración completa:} el sistema une lectura analógica, lógica de juego, salidas físicas y una interfaz web actualizada en tiempo real, todo coordinado por el ESP8266.
       \item \textbf{Diseño seguro entre placas:} usar el Arduino UNO como lector del joystick resolvió la falta de una segunda entrada analógica, y el divisor de tensión protegió al ESP8266 de los 5\,V.
       \item \textbf{Programación no bloqueante:} el uso de \texttt{millis()} en lugar de \texttt{delay()} permitió atender el joystick, los sonidos y la web al mismo tiempo, sin cortes.
-      \item \textbf{Pruebas por etapas:} simular en Wokwi y probar cada componente por separado permitió encontrar rápido los errores de conexión sin dañar las placas.
+      \item \textbf{Pruebas por etapas:} simular en Cirkit Designer y probar cada componente por separado permitió encontrar rápido los errores de conexión.
     \end{itemize}
   \end{block}
 
@@ -308,7 +308,7 @@
       \item Arduino. (s.f.). \textit{Arduino Documentation}. https://docs.arduino.cc
       \item ESP8266 Community. (s.f.). \textit{ESP8266 Arduino Core Documentation}. https://arduino-esp8266.readthedocs.io
       \item Texas Instruments. (2021). \textit{SNx4HC595 8-Bit Shift Registers With 3-State Output Registers} [Hoja de datos]. https://www.ti.com/product/SN74HC595
-      \item Wokwi. (s.f.). \textit{Wokwi Docs}. https://docs.wokwi.com
+      \item Cirkit Designer. (s.f.). \textit{Cirkit Designer}. https://www.cirkitdesigner.com
       \item Universidad Nacional de Hurlingham (2026). \textit{Material de clase Arquitectura de Computadoras}.
       \item Normas APA. (s.f.). \textit{Guía de estilo APA - 7ª edición}. https://normas-apa.org
       \item Simulación: \href{https://app.cirkitdesigner.com/project/a3656b23-a601-4fc2-a228-c781c96eade9}{Pulsá para ingresar a la simulación en Cirkit Designer}

@@ -20,8 +20,6 @@ Juego de plataformas con desplazamiento lateral, al estilo de Mario Bros o Metal
 | Póster (Overleaf) | ✅ `poster/poster.tex` |
 | Firmware del ESP8266 con el juego de plataformas | ✅ `firmware/KernelPanic` (probado en el hardware, ver `docs/bitacora.md`) |
 | Simulación en Cirkit Designer (Arduino UNO + ESP32-S3) | ✅ `cirkit/` · [proyecto](https://app.cirkitdesigner.com/project/a3656b23-a601-4fc2-a228-c781c96eade9) · imagen en `docs/circuito_cirkit.png` |
-| Simulación del circuito en Wokwi (ESP32, con protoboard) | ✅ `wokwi/` (programa de prueba de componentes) |
-| El juego completo dentro de la simulación | 🔧 en desarrollo |
 
 ---
 
@@ -47,7 +45,6 @@ Kernel_Panic_Game/
 ├── docs/guia_armado.html        Guía paso a paso del circuito (abrir en el navegador)
 ├── docs/bitacora.md             Registro de las pruebas del circuito real, paso a paso
 ├── cirkit/                      Simulación en Cirkit Designer: código del ESP32-S3 (el UNO usa arduino_uno/JoystickUNO)
-├── wokwi/                       Simulación en Wokwi: diagram.json (protoboard) y sketch.ino
 └── poster/                      Póster en LaTeX para Overleaf
 ```
 
@@ -203,7 +200,7 @@ La página pide `/estado` con `fetch()` cada 100 ms y dibuja lo que recibe en un
 | El botón de disparo daba siempre 0 o no cambiaba | Estaba girado (patas unidas por dentro) y en el pin equivocado; se giró 90° y se pasó al pin 3 |
 | Con el juego andando, los botones respondían a veces sí y a veces no | `SoftwareSerial` del ESP8266 leía mal algunos caracteres mientras atendía el Wi-Fi. Se bajó la velocidad a 19200 baudios y se agregó un número de verificación a cada línea para descartar las que llegan con errores |
 | Los 5 LEDs amarillos no encendían | Estaban colocados al revés; se dieron vuelta (la pata larga va hacia la salida del 595) |
-| Wokwi no simula el ESP8266 | La simulación usa un ESP32, que además puede leer el joystick directamente |
+| Cirkit Designer no tiene el ESP8266 | La simulación usa un ESP32-S3 con pines equivalentes (GPIO 16, 11, 12, 10 y 6) |
 | Los LEDs de 5 mm no entran en columnas seguidas | Se ubican en columnas alternadas (29, 31, … 43) |
 | En el protoboard, las filas + y − de un lado están en orden inverso al dibujo | Se conecta siguiendo el color de la línea (roja = 3,3 V, azul = GND), no la posición |
 | El nombre `Dir` chocaba con una clase del núcleo del ESP8266 | Se renombró a `Direccion` |

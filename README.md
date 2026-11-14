@@ -44,29 +44,30 @@ El proyecto se desarrolló por etapas:
 
 ```
 Kernel_Panic_Game/
-├── firmware/KernelPanic/        Firmware del juego para el NodeMCU ESP8266
-│   ├── KernelPanic.ino          setup() y loop()
-│   ├── config.h                 Wi-Fi, pines y orientación del joystick
-│   ├── hardware.h               Lectura del UNO, 74HC595 y buzzer
-│   ├── juego.h                  La lógica del juego (nivel, jugador, enemigos, jefe)
-│   ├── web.h                    Wi-Fi y servidor web (/, /mapa, /estado)
-│   └── pagina.h                 La página del juego guardada en la memoria flash
-├── prototipo_web/index.html     El juego completo en el navegador (simula el hardware)
-├── arduino_uno/JoystickUNO/     Programa del Arduino UNO: lee el joystick y lo envía por UART
-├── pruebas/                     Un sketch de prueba por componente (para el ESP8266)
-│   ├── Prueba1_LEDs_595/        74HC595 y los 8 LEDs
-│   ├── Prueba2_Buzzer/          Buzzer
-│   ├── Prueba3_Control/         Joystick y botón en el Arduino UNO (diagnóstico)
-│   ├── Prueba4_Divisor/         Medición del divisor con el tester (sin programa)
-│   ├── Prueba5_UART_UNO/        Recepción de los datos del UNO
-│   └── Prueba6_Juego_completo/  Juego completo con los programas finales
-├── docs/guia_armado.html        Guía paso a paso del circuito (abrir en el navegador)
-├── docs/armado_proceso.jpg      Foto del proceso de armado del circuito
-├── docs/armado_final.jpg        Foto del prototipo terminado
-├── docs/medicion_divisor.jpg    Foto de la medición del divisor con el tester
-├── docs/pruebas.md              Pruebas del circuito antes de armar el juego completo
-├── cirkit/                      Simulación en Cirkit Designer: código del ESP32-S3 (el UNO usa arduino_uno/JoystickUNO)
-└── poster/                      Póster en LaTeX para Overleaf (logos/ tiene la captura del juego y el circuito)
+├── prototipo_web/index.html     1. El juego completo en el navegador (simula el hardware)
+├── cirkit/                      2. Diseño del circuito en Cirkit Designer: código del ESP32-S3
+├── docs/                        3. Armado y pruebas del circuito real
+│   ├── guia_armado.html            Guía paso a paso del protoboard (abrir en el navegador)
+│   ├── armado_proceso.jpg          Foto del proceso de armado
+│   ├── armado_final.jpg            Foto del prototipo terminado
+│   ├── pruebas.md                  Resultado de cada prueba antes del juego completo
+│   └── medicion_divisor.jpg        Foto de la medición del divisor con el tester
+├── pruebas/                     4. Un programa de prueba por componente
+│   ├── Prueba1_LEDs_595/           74HC595 y los 8 LEDs
+│   ├── Prueba2_Buzzer/             Buzzer
+│   ├── Prueba3_Control/            Joystick y botón en el Arduino UNO (diagnóstico)
+│   ├── Prueba4_Divisor/            Medición del divisor con el tester (sin programa)
+│   ├── Prueba5_UART_UNO/           Recepción de los datos del UNO
+│   └── Prueba6_Juego_completo/     Juego completo con los programas finales
+├── arduino_uno/JoystickUNO/     5. Programa del Arduino UNO: lee el joystick y lo envía por UART
+├── firmware/KernelPanic/        6. Firmware del juego para el NodeMCU ESP8266
+│   ├── KernelPanic.ino             setup() y loop()
+│   ├── config.h                    Wi-Fi, pines y orientación del joystick
+│   ├── hardware.h                  Lectura del UNO, 74HC595 y buzzer
+│   ├── juego.h                     La lógica del juego (nivel, jugador, enemigos, jefe)
+│   ├── web.h                       Wi-Fi y servidor web (/, /mapa, /estado)
+│   └── pagina.h                    La página del juego guardada en la memoria flash
+└── poster/                      7. Póster en LaTeX para Overleaf (logos/ tiene la captura del juego y el circuito)
 ```
 
 ---

@@ -25,7 +25,7 @@ El proyecto se desarrolló por etapas:
 | Guía de armado del protoboard | ✅ `docs/guia_armado.html` |
 | Póster (Overleaf) | ✅ `poster/poster.tex` |
 | Firmware del ESP8266 con el juego de plataformas | ✅ `firmware/KernelPanic` (probado en el hardware, ver `docs/pruebas.md`) |
-| Simulación en Cirkit Designer (Arduino UNO + ESP32-S3) | ✅ `cirkit/` · [proyecto](https://app.cirkitdesigner.com/project/a3656b23-a601-4fc2-a228-c781c96eade9) · imagen en `docs/circuito_cirkit.png` |
+| Simulación en Cirkit Designer (Arduino UNO + ESP32-S3) | ✅ `cirkit/` · [proyecto](https://app.cirkitdesigner.com/project/a3656b23-a601-4fc2-a228-c781c96eade9) |
 
 ---
 
@@ -40,7 +40,6 @@ Kernel_Panic_Game/
 │   ├── juego.h                  La lógica del juego (nivel, jugador, enemigos, jefe)
 │   ├── web.h                    Wi-Fi y servidor web (/, /mapa, /estado)
 │   └── pagina.h                 La página del juego guardada en la memoria flash
-├── firmware/pagina/pagina.html  Fuente editable de la página (se copia dentro de pagina.h)
 ├── prototipo_web/index.html     El juego completo en el navegador (simula el hardware)
 ├── arduino_uno/JoystickUNO/     Programa del Arduino UNO: lee el joystick y lo envía por UART
 ├── pruebas/                     Un sketch de prueba por componente (para el ESP8266)
@@ -51,9 +50,10 @@ Kernel_Panic_Game/
 │   ├── Prueba5_UART_UNO/        Recepción de los datos del UNO
 │   └── Prueba6_Juego_completo/  Juego completo con los programas finales
 ├── docs/guia_armado.html        Guía paso a paso del circuito (abrir en el navegador)
+├── docs/medicion_divisor.jpg    Foto de la medición del divisor con el tester
 ├── docs/pruebas.md              Pruebas del circuito antes de armar el juego completo
 ├── cirkit/                      Simulación en Cirkit Designer: código del ESP32-S3 (el UNO usa arduino_uno/JoystickUNO)
-└── poster/                      Póster en LaTeX para Overleaf
+└── poster/                      Póster en LaTeX para Overleaf (logos/ tiene la captura del juego y el circuito)
 ```
 
 ---
@@ -92,7 +92,7 @@ El UNO manda 50 veces por segundo, a 19200 baudios, una línea de texto: `X,Y,SW
 
 ## Conexiones
 
-![Circuito completo en Cirkit Designer](docs/circuito_cirkit.png)
+![Circuito completo en Cirkit Designer](poster/logos/circuito.png)
 
 *Circuito completo dibujado en [Cirkit Designer](https://app.cirkitdesigner.com/project/a3656b23-a601-4fc2-a228-c781c96eade9). Cirkit no tiene el ESP8266, así que en el dibujo lo reemplaza un ESP32-S3 con los pines equivalentes: GPIO 16 para recibir del UNO, GPIO 11, 12 y 10 para el 74HC595, y GPIO 6 para el buzzer.*
 
@@ -190,9 +190,10 @@ El nivel es una grilla de 224 × 15 casillas guardada como texto. Izquierda y de
 Todo avanza en **pasos de 50 ms** medidos con `millis()`. No se usa `delay()`, porque congelaría la lectura del joystick y el servidor web. En cada paso se leen las entradas, se mueve al jugador, se avanzan las balas, se mueven los enemigos cercanos a la cámara y se revisan las colisiones. Después se actualizan los puntos, los LEDs y el buzzer. El juego es una **máquina de estados**: MENÚ → JUGANDO ⇄ PAUSA → PERDIDO o GANADO.
 
 ### 6. ¿Cómo se comunica el ESP8266 con la página web?
-El ESP8266 funciona como **servidor web** con dos rutas:
+El ESP8266 funciona como **servidor web** con tres rutas:
 - `/` devuelve la página del juego, guardada en la memoria flash (`PROGMEM`) para no ocupar RAM.
-- `/estado` devuelve en **JSON** (biblioteca ArduinoJson) la posición del jugador, los enemigos, las balas, los puntos, el estado de la partida, el joystick, los LEDs y el buzzer.
+- `/mapa` devuelve el nivel como texto (15 líneas de 224 caracteres); la página lo pide al cargar y cada vez que el nivel cambia (por ejemplo, cuando se abre una puerta).
+- `/estado` devuelve en **JSON** (armado a mano, sin bibliotecas) la posición del jugador, los enemigos, las balas, los puntos, el estado de la partida, el joystick, los LEDs y el buzzer.
 
 ### 7. ¿Cómo se actualiza el juego en tiempo real?
 La página pide `/estado` con `fetch()` cada 100 ms y dibuja lo que recibe en un `<canvas>`. La página no calcula el juego, solo lo muestra; para que se vea fluido, interpola las posiciones entre una respuesta y la siguiente.

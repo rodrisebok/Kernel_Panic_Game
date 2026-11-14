@@ -1,7 +1,7 @@
 /*
   pagina.h — La página del juego. Se guarda en la memoria flash (PROGMEM) y el ESP la envía
   cuando el navegador abre http://<ip-del-esp>/
-  Fuente editable: firmware/pagina/pagina.html (este archivo se genera a partir de ella).
+  Es HTML, CSS y JavaScript comunes, escritos dentro de R"rawliteral( ... )rawliteral".
 */
 #pragma once
 

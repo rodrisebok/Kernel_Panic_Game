@@ -2,37 +2,10 @@
   config.h — Todo lo que se puede ajustar sin tocar la lógica del juego.
   Kernel Panic · Videojuego IoT con ESP8266
 
-  El mismo código compila para dos placas:
-    - NodeMCU ESP8266: el hardware real del TP (joystick leído por el Arduino UNO).
-    - ESP32 DevKit: la simulación en Wokwi (que no tiene ESP8266). El ESP32 tiene
-      varias entradas analógicas, así que ahí el joystick y el botón se leen directo.
-  El compilador elige solo según la placa seleccionada.
+  Placa: NodeMCU 1.0 (ESP-12E Module). El joystick lo lee el Arduino UNO y llega por UART.
 */
 #pragma once
 
-#if defined(ESP32)
-// =====================================================================
-//  ESP32 · simulación en Wokwi
-// =====================================================================
-const char* WIFI_RED   = "Wokwi-GUEST";   // red simulada de Wokwi, sin clave
-const char* WIFI_CLAVE = "";
-const int   WIFI_CANAL = 6;               // Wokwi conecta más rápido en el canal 6
-
-const uint8_t PIN_JOY_X     = 34;  // joystick HORZ (entrada analógica)
-const uint8_t PIN_JOY_Y     = 35;  // joystick VERT (entrada analógica)
-const uint8_t PIN_JOY_SW    = 27;  // joystick SEL (pulsador)
-const uint8_t PIN_BOTON     = 32;  // botón de disparo
-const uint8_t PIN_BUZZER    = 26;
-const uint8_t PIN_595_DATOS = 23;  // 74HC595 DS
-const uint8_t PIN_595_RELOJ = 18;  // 74HC595 SHCP
-const uint8_t PIN_595_LATCH = 19;  // 74HC595 STCP
-
-#define JOYSTICK_DIRECTO 1   // el ESP32 lee el joystick sin el Arduino UNO
-#define INTERCAMBIAR_EJES 0
-#define INVERTIR_X 1         // en el joystick de Wokwi, izquierda da 1023
-#define INVERTIR_Y 1         // y arriba da 1023
-
-#else
 // =====================================================================
 //  NodeMCU ESP8266 · hardware real
 // =====================================================================
@@ -41,13 +14,12 @@ const uint8_t PIN_595_LATCH = 19;  // 74HC595 STCP
 const char* WIFI_RED   = "TU_RED";
 const char* WIFI_CLAVE = "TU_CLAVE";
 
-const uint8_t PIN_UNO_RX    = D2;  // recibe "X,Y,SW,BOTON" del Arduino UNO (a través del divisor)
+const uint8_t PIN_UNO_RX    = D2;  // recibe "X,Y,SW,BOTON,CONTROL" del Arduino UNO (a través del divisor)
 const uint8_t PIN_BUZZER    = D6;  // buzzer
 const uint8_t PIN_595_DATOS = D7;  // 74HC595 pata 14 (DS)
 const uint8_t PIN_595_RELOJ = D8;  // 74HC595 pata 11 (SH_CP)
 const uint8_t PIN_595_LATCH = D0;  // 74HC595 pata 12 (ST_CP)
 
-#define JOYSTICK_DIRECTO 0   // el joystick llega por UART desde el Arduino UNO
 
 // Orientación del joystick. En nuestro control el módulo quedó girado 90°:
 // la palanca hacia adelante movía el eje X y hacia la derecha movía el eje Y.
@@ -56,7 +28,6 @@ const uint8_t PIN_595_LATCH = D0;  // 74HC595 pata 12 (ST_CP)
 #define INTERCAMBIAR_EJES 1  // 1 = el eje X del UNO es el vertical y el Y es el horizontal
 #define INVERTIR_X 0         // 1 = izquierda y derecha al revés
 #define INVERTIR_Y 1         // 1 = arriba y abajo al revés
-#endif
 
 // ===================== Comunes a las dos placas =====================
 // Si no logra conectarse en WIFI_ESPERA_MS, crea su propia red (modo Access Point).

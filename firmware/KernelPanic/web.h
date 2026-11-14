@@ -7,22 +7,14 @@
 */
 #pragma once
 
-#if defined(ESP32)
-WebServer server(80);
-#else
 ESP8266WebServer server(80);
-#endif
 
 String ipTexto;
 
 // ===================== Wi-Fi =====================
 void iniciarWifi() {
   WiFi.mode(WIFI_STA);
-#if defined(ESP32)
-  WiFi.begin(WIFI_RED, WIFI_CLAVE, WIFI_CANAL);
-#else
   WiFi.begin(WIFI_RED, WIFI_CLAVE);
-#endif
   Serial.printf("\nConectando a la red \"%s\"", WIFI_RED);
   uint32_t t0 = millis();
   while (WiFi.status() != WL_CONNECTED && millis() - t0 < WIFI_ESPERA_MS) {

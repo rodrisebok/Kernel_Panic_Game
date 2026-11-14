@@ -24,14 +24,9 @@
   No hace falta instalar bibliotecas: todo viene con el soporte de placas ESP8266.
 */
 
-#if defined(ESP32)
-  #include <WiFi.h>
-  #include <WebServer.h>
-#else
-  #include <ESP8266WiFi.h>
-  #include <ESP8266WebServer.h>
-  #include <SoftwareSerial.h>
-#endif
+#include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>
+#include <SoftwareSerial.h>
 #include <EEPROM.h>
 
 #include "config.h"

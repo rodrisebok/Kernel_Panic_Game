@@ -33,7 +33,7 @@ const int MELODIA[][2] = {
   {D5,1},{B4,1},{G4,1},{B4,1},  {D5,3},{SIL,1},
   {F4,1},{A4,1},{C5,1},{A4,1},  {F5,2},{E5,1},{D5,1},
   {E5,1},{C5,1},{G4,1},{C5,1},  {E5,3},{SIL,1},
-  // Parte B: más tensa, como acercándose al virus
+  // Parte B: más tensa, como acercándose a NÚCLEO-0
   {A4,1},{A4,1},{C5,1},{A4,1},  {G4,1},{A4,1},{C5,2},
   {B4,1},{B4,1},{D5,1},{B4,1},  {A4,1},{B4,1},{D5,2},
   {C5,1},{E5,1},{G5,1},{E5,1},  {A5,2},{G5,1},{E5,1},

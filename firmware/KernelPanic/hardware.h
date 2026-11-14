@@ -1,7 +1,7 @@
 /*
   hardware.h — Entradas y salidas físicas.
     - Joystick y botón de disparo: en el ESP8266 llegan por UART desde el Arduino UNO
-      ("X,Y,SW,BOTON\n"); en el ESP32 (Wokwi) se leen directo
+      ("X,Y,SW,BOTON,CONTROL\n")
     - Pulsador SW: antirrebote y detección del flanco
     - 74HC595: barra de 8 LEDs
     - Buzzer: cola de notas que no bloquea
@@ -75,13 +75,6 @@ void nuevaLecturaJoystick(long x, long y, long sw, long boton) {
   }
 }
 
-#if JOYSTICK_DIRECTO
-// ESP32 (Wokwi): tiene varias entradas analógicas, lee los dos ejes directamente.
-void leerUno() {}
-void leerJoystickDirecto() {
-  nuevaLecturaJoystick(analogRead(PIN_JOY_X), analogRead(PIN_JOY_Y), digitalRead(PIN_JOY_SW), digitalRead(PIN_BOTON));
-}
-#else
 // ESP8266: el joystick llega por UART desde el Arduino UNO.
 SoftwareSerial unoSerial(PIN_UNO_RX, -1);   // solo recibe
 char unoBuf[24];
@@ -132,13 +125,9 @@ void leerUno() {
   }
   if (HW.unoOk && millis() - HW.unoUltimo > UNO_TIMEOUT_MS) HW.unoOk = false;
 }
-#endif
 
 // ===================== Lectura de entradas (una vez por tick) =====================
 void leerEntradas() {
-#if JOYSTICK_DIRECTO
-  leerJoystickDirecto();
-#endif
   // Si el UNO no responde, el joystick queda en el centro y los botones sueltos.
   int x = HW.unoOk ? HW.joyX : HW.centroX;
   int y = HW.unoOk ? HW.joyY : HW.centroY;
@@ -266,11 +255,5 @@ void iniciarHardware() {
   pinMode(PIN_595_LATCH, OUTPUT);
   pinMode(PIN_BUZZER, OUTPUT);
   escribir595(0);
-#if JOYSTICK_DIRECTO
-  pinMode(PIN_JOY_SW, INPUT_PULLUP);
-  pinMode(PIN_BOTON, INPUT_PULLUP);
-  analogReadResolution(10);   // el ESP32 lee 0..4095 por defecto; así queda 0..1023 como el UNO
-#else
   unoSerial.begin(UNO_BAUDIOS, SWSERIAL_8N1, PIN_UNO_RX, -1, false, 256);   // búfer de 256 bytes
-#endif
 }

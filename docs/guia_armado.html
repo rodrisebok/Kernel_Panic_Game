@@ -436,7 +436,7 @@ input:focus-visible{outline:2px solid var(--dat);outline-offset:2px}
       <div>
         <div class="test"><h4>Probalo</h4><p>Cargá <b>JoystickUNO</b> en el UNO (placa: Arduino Uno) y abrí el Monitor Serie a 38400. Con todo quieto deberías ver algo como <code>519,507,1,1</code>. Cada eje llega a 0 y a 1023 en los extremos. Al hundir la palanca, el tercer número pasa a 0; al apretar el botón de ataque, el cuarto.</p></div>
         <div class="fail"><h4>Si falla</h4><ul>
-          <li>Se ven símbolos raros: el Monitor Serie no está en 38400.</li>
+          <li>Se ven símbolos raros: el Monitor Serie no está en 19200.</li>
           <li>X e Y están cambiados: intercambiá los cables de A0 y A1.</li>
           <li>Un eje va al revés: lo corregís en el paso 7 con <code>INVERTIR_X</code> o <code>INVERTIR_Y</code>.</li>
           <li>El botón siempre da 1: revisá que esté en el pin 3 (no en el 2), que cada cable esté en la misma línea que una pata y que la otra pata vaya a GND.</li>
@@ -492,7 +492,7 @@ input:focus-visible{outline:2px solid var(--dat);outline-offset:2px}
         <p class="tip"><b>Por qué:</b> el UNO manda pulsos de 5 V y el ESP aguanta 3,3 V. Las tres resistencias reparten el voltaje: 5 V × 2 kΩ / 3 kΩ ≈ 3,3 V.</p>
       </div>
       <div>
-        <div class="test"><h4>Probalo</h4><p>Conectá los dos USB. Cargá la <b>Prueba 4</b> en el ESP y abrí su Monitor Serie a 115200. Deberías ver líneas como <code>X= 519  Y= 507  SW=1  BOTON=1 → CENTRO</code>, que cambian al mover la palanca y al apretar el botón.</p></div>
+        <div class="test"><h4>Probalo</h4><p>Conectá los dos USB. Cargá la <b>Prueba 5</b> en el ESP y abrí su Monitor Serie a 115200. Deberías ver líneas como <code>X= 519  Y= 507  SW=1  BOTON=1 → CENTRO</code>, que cambian al mover la palanca y al apretar el botón.</p></div>
         <div class="fail"><h4>Si falla</h4><ul>
           <li>No llega nada: revisá el GND común y que el cable salga del pin 1 (TX).</li>
           <li>Aparece "Línea con error" muy seguido: hay un cable flojo.</li>

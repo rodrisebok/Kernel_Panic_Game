@@ -180,13 +180,8 @@ Para probarlo sin hardware, abrí `prototipo_web/index.html` en el navegador. Se
 | El UNO trabaja a 5 V y el ESP8266 a 3,3 V | Divisor de tensión con 3 resistencias de 1 kΩ en la señal TX, y cada placa alimentada por su propio USB |
 | Faltaban pines para 8 LEDs | 74HC595: 8 salidas con 3 pines |
 | `delay()` congela el servidor web | Reloj del juego con `millis()` |
-| El Arduino IDE no mostraba el puerto del NodeMCU | El cable USB era solo de carga; con otro cable apareció el chip CP2102 sin driver y se instaló el driver CP210x de Silicon Labs |
 | Los ejes del joystick quedaban fijos en 1023 | Falso contacto en el GND del joystick; se ajustaron los cables |
 | El botón de disparo daba siempre 0 o no cambiaba | Estaba girado (patas unidas por dentro) y en el pin equivocado; se giró 90° y se pasó al pin 3 |
 | Con el juego andando, los botones respondían a veces sí y a veces no | `SoftwareSerial` del ESP8266 leía mal algunos caracteres mientras atendía el Wi-Fi. Se bajó la velocidad a 19200 baudios y se agregó un número de verificación a cada línea para descartar las que llegan con errores |
-| Los 5 LEDs amarillos no encendían | Estaban colocados al revés; se dieron vuelta (la pata larga va hacia la salida del 595) |
 | Cirkit Designer no tiene el ESP8266 | La simulación usa un ESP32-S3 con pines equivalentes (GPIO 16, 11, 12, 10 y 6) |
-| Los LEDs de 5 mm no entran en columnas seguidas | Se ubican en columnas alternadas (29, 31, … 43) |
-| En el protoboard, las filas + y − de un lado están en orden inverso al dibujo | Se conecta siguiendo el color de la línea (roja = 3,3 V, azul = GND), no la posición |
-| El nombre `Dir` chocaba con una clase del núcleo del ESP8266 | Se renombró a `Direccion` |
 | El jefe no se movía cuando estaba lejos de la cámara | El jefe se actualiza siempre y la cámara se fija durante la pelea |

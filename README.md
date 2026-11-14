@@ -78,7 +78,7 @@ Kernel_Panic_Game/
 |---|---|---|
 | NodeMCU ESP8266 | 1 | Lógica del juego, servidor web y salidas |
 | Arduino UNO | 1 | Lee los dos ejes del joystick (el ESP8266 tiene una sola entrada analógica) |
-| Joystick analógico KY-023 | 1 | Mover, saltar y agacharse · pulsador SW: iniciar, pausar, reiniciar |
+| Joystick analógico HW-504 | 1 | Mover, saltar y agacharse · pulsador SW: iniciar, pausar, reiniciar |
 | Pulsador | 1 | Disparar |
 | 74HC595 | 1 | Registro de desplazamiento: maneja 8 LEDs con 3 pines |
 | LEDs | 8 | 3 rojos (vidas) + 5 amarillos (avance en el nivel) |
